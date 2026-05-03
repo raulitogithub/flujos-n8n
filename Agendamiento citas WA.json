@@ -1,0 +1,693 @@
+{
+  "name": "Agendamiento Citas WhatsApp",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "citas-wa", "options": {} },
+      "id": "wa001-0000-0000-0000-000000000001",
+      "name": "WA Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-400, 624],
+      "webhookId": "citas-wa-webhook-2025"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 3 },
+          "conditions": [
+            { "id": "fg1", "leftValue": "={{ $json.body.data.key.remoteJid }}", "rightValue": "@g.us", "operator": { "type": "string", "operation": "notContains" } },
+            { "id": "fg2", "leftValue": "={{ $json.body.data.key.fromMe }}", "rightValue": "", "operator": { "type": "boolean", "operation": "false", "singleValue": true } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "wa002-0000-0000-0000-000000000002",
+      "name": "Filtrar grupos y propios",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [-200, 624]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "dc1", "name": "chatId", "value": "={{ ($json.body.data?.key?.remoteJid || '').split('@')[0] }}", "type": "string" },
+            { "id": "dc2", "name": "messageText", "value": "={{ $json.body.data.message?.conversation || $json.body.data.message?.extendedTextMessage?.text || '' }}", "type": "string" },
+            { "id": "dc3", "name": "instance", "value": "={{ $json.body.instance }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wa003-0000-0000-0000-000000000003",
+      "name": "data_citas",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [0, 624]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+                "combinator": "and",
+                "conditions": [{ "id": "sw1", "operator": { "type": "string", "operation": "equals" }, "leftValue": "={{ $json.messageText }}", "rightValue": "/start" }]
+              }
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+                "combinator": "and",
+                "conditions": [{ "id": "sw2", "operator": { "type": "string", "operation": "startsWith" }, "leftValue": "={{ $json.messageText }}", "rightValue": "agendar " }]
+              }
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+                "combinator": "and",
+                "conditions": [{ "id": "sw3", "operator": { "type": "string", "operation": "startsWith" }, "leftValue": "={{ $json.messageText }}", "rightValue": "cancelar " }]
+              }
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+                "combinator": "and",
+                "conditions": [{ "id": "sw4", "operator": { "type": "string", "operation": "startsWith" }, "leftValue": "={{ $json.messageText }}", "rightValue": "citas " }]
+              }
+            }
+          ]
+        },
+        "options": { "fallbackOutput": "extra" }
+      },
+      "id": "wa004-0000-0000-0000-000000000004",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [200, 624]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('data_citas').item.json.instance }}",
+        "remoteJid": "={{ $('data_citas').item.json.chatId }}",
+        "messageText": "=¡Hola! 👋 Bienvenido/a al Asistente Virtual de Citas.\n\n*🗓️ Agendar una cita:*\n`agendar AAAA-MM-DD HH:MM Tu Nombre Completo`\n_Ejemplo: agendar 2025-09-22 15:00 Ana Rodriguez_\n\n*❌ Cancelar una cita:*\n`cancelar AAAA-MM-DD HH:MM Tu Nombre Completo`\n\n*📋 Ver tus citas:*\n`citas Tu Nombre Completo`\n\nAtendemos *lunes a viernes 07:00-19:00* y *sábados 07:00-13:00*.",
+        "options_message": {}
+      },
+      "id": "wa005-0000-0000-0000-000000000005",
+      "name": "Respuesta Bienvenida",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [400, -160],
+      "credentials": { "evolutionApi": { "id": "6aCgScDhYrgRt176", "name": "Evolution account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.messageText.trim();\nconst parts = text.split(/\\s+/);\nif (parts.length < 4) {\n  return { valid: false, error: \"Faltan datos\\\\. Usa el formato exacto:\\\\n`agendar AAAA\\\\-MM\\\\-DD HH:MM Tu Nombre`\\\\n\\\\nEjemplo:\\\\n`agendar 2025\\\\-09\\\\-22 15:00 Ana García`\" };\n}\nconst date = parts[1];\nconst time = parts[2];\nconst name = parts.slice(3).join(' ').trim();\nconst dateRegex = /^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$/;\nif (!dateRegex.test(date)) {\n  return { valid: false, error: `La fecha *${date}* no es válida\\\\.\\nUsa el formato: \\`AAAA\\\\-MM\\\\-DD\\`\\nEjemplo: \\`2025\\\\-09\\\\-22\\`` };\n}\nconst timeRegex = /^([01]\\d|2[0-3]):[0-5]\\d$/;\nif (!timeRegex.test(time)) {\n  return { valid: false, error: `La hora *${time}* no es válida\\\\.\\nUsa formato 24h: \\`HH:MM\\`\\nEjemplo: \\`15:00\\`` };\n}\nconst zone = 'America/Guayaquil';\nconst startDateTime = DateTime.fromFormat(`${date} ${time}`, 'yyyy-MM-dd HH:mm', { zone });\nif (!startDateTime.isValid) {\n  return { valid: false, error: `La fecha *${date}* no existe en el calendario\\\\. Verifica el día del mes\\\\.` };\n}\nif (startDateTime < DateTime.now().setZone(zone)) {\n  return { valid: false, error: `La fecha *${date} ${time}* ya pasó\\\\. Por favor elige una fecha y hora futura\\\\.` };\n}\nconst weekday = startDateTime.weekday;\nconst hour = startDateTime.hour;\nconst minute = startDateTime.minute;\nconst timeInMin = hour * 60 + minute;\nif (weekday === 7) {\n  return { valid: false, error: \"No atendemos los *domingos*\\\\. Elige un día de lunes a sábado\\\\.\" };\n}\nif (weekday === 6 && timeInMin > 13*60) {\n  return { valid: false, error: \"Los sábados atendemos hasta las *13:00*\\\\. Elige otro horario\\\\.\" };\n}\nif (timeInMin < 7*60 || timeInMin > 19*60) {\n  return { valid: false, error: \"Horario de atención: *lunes a viernes 07:00\\\\-19:00*, *sábados 07:00\\\\-13:00*\\\\.\" };\n}\nif (!name || name.split(' ').filter(w => w.length > 0).length < 2) {\n  return { valid: false, error: \"Por favor escribe tu *nombre y apellido completos*\\\\.\\nEjemplo: `agendar 2025\\\\-09\\\\-22 15:00 Ana García`\" };\n}\nif (/\\d/.test(name)) {\n  return { valid: false, error: \"El nombre no debe contener números\\\\. Escribe tu nombre completo\\\\.\" };\n}\nconst endDateTime = startDateTime.plus({ hours: 1 });\nreturn { valid: true, date, time, name, startDateTime: startDateTime.toISO(), endDateTime: endDateTime.toISO(), summary: `Cita para ${name} - Bot CIAP` };"
+      },
+      "id": "wa006-0000-0000-0000-000000000006",
+      "name": "Validar Agendar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [424, 336]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "combinator": "and",
+          "conditions": [{ "id": "va1", "operator": { "type": "boolean", "operation": "true", "singleValue": true }, "leftValue": "={{ $json.valid }}", "rightValue": "" }]
+        },
+        "options": {}
+      },
+      "id": "wa007-0000-0000-0000-000000000007",
+      "name": "¿Agendar válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [664, 208]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('data_citas').item.json.instance }}",
+        "remoteJid": "={{ $('data_citas').item.json.chatId }}",
+        "messageText": "=⚠️ {{ $json.error }}\n\nIntenta de nuevo o escribe /start para ver los comandos.",
+        "options_message": {}
+      },
+      "id": "wa008-0000-0000-0000-000000000008",
+      "name": "Error formato agendar",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [424, 80],
+      "credentials": { "evolutionApi": { "id": "6aCgScDhYrgRt176", "name": "Evolution account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const zone = 'America/Guayaquil';\nconst { date, time, name, summary } = $input.first().json;\nconst startDateTime = DateTime.fromFormat(`${date} ${time}`, 'yyyy-MM-dd HH:mm', { zone });\nconst endDateTime = startDateTime.plus({ hours: 1 });\nreturn { name, summary: summary || `Cita para ${name} - Bot CIAP`, startDateTime: startDateTime.toISO(), endDateTime: endDateTime.toISO(), date };"
+      },
+      "id": "wa009-0000-0000-0000-000000000009",
+      "name": "Preparar Agendar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 336]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": { "__rl": true, "mode": "list", "value": "user@example.com", "cachedResultName": "Citas CIAP" },
+        "returnAll": true,
+        "timeMin": "={{ $json.startDateTime }}",
+        "timeMax": "={{ $json.endDateTime }}",
+        "options": {}
+      },
+      "id": "wa010-0000-0000-0000-000000000010",
+      "name": "Get many events",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [1140, 336],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "combinator": "and",
+          "conditions": [{ "id": "sd1", "operator": { "type": "boolean", "operation": "true", "singleValue": true }, "leftValue": "={{ $json.isEmpty() }}", "rightValue": 0 }]
+        },
+        "options": {}
+      },
+      "id": "wa011-0000-0000-0000-000000000011",
+      "name": "¿Slot disponible?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1380, 336]
+    },
+    {
+      "parameters": {
+        "calendar": { "__rl": true, "mode": "list", "value": "user@example.com", "cachedResultName": "Citas CIAP" },
+        "start": "={{ $('Preparar Agendar').item.json.startDateTime }}",
+        "end": "={{ $('Preparar Agendar').item.json.endDateTime }}",
+        "useDefaultReminders": false,
+        "additionalFields": {
+          "attendees": [],
+          "description": "Cita agendada por WhatsApp Bot",
+          "summary": "={{ $('Preparar Agendar').item.json.summary }}"
+        },
+        "remindersUi": { "remindersValues": [{ "method": "popup", "minutes": 30 }] }
+      },
+      "id": "wa012-0000-0000-0000-000000000012",
+      "name": "Create an event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [1640, 80]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": { "__rl": true, "mode": "list", "value": "1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM", "cachedResultName": "Citas Agendadas" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "gid=0", "cachedResultName": "Hoja 1" },
+        "columns": {
+          "value": {
+            "id": "={{ $json.id }}",
+            "Fecha ISO": "={{ $json.start.dateTime }}",
+            "Fecha y hora": "={{ DateTime.fromISO($('Preparar Agendar').item.json.startDateTime).setLocale('es').toFormat(\"EEEE, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\") }}",
+            "Nombre Cliente": "={{ $('Preparar Agendar').item.json.name }}"
+          },
+          "schema": [
+            { "id": "id", "type": "string", "display": true, "removed": false, "required": false, "displayName": "id", "defaultMatch": true, "canBeUsedToMatch": true },
+            { "id": "Nombre Cliente", "type": "string", "display": true, "required": false, "displayName": "Nombre Cliente", "defaultMatch": false, "canBeUsedToMatch": true },
+            { "id": "Fecha y hora", "type": "string", "display": true, "required": false, "displayName": "Fecha y hora", "defaultMatch": false, "canBeUsedToMatch": true },
+            { "id": "Fecha ISO", "type": "string", "display": true, "required": false, "displayName": "Fecha ISO", "defaultMatch": false, "canBeUsedToMatch": true }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": ["id"],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "wa013-0000-0000-0000-000000000013",
+      "name": "Agregar cita en Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [1900, 80]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('data_citas').item.json.instance }}",
+        "remoteJid": "={{ $('data_citas').item.json.chatId }}",
+        "messageText": "=✅ ¡Tu cita ha sido agendada con éxito!\n\n👤 *Nombre:* {{ $('Preparar Agendar').item.json.name }}\n📅 *Fecha y Hora:* {{ DateTime.fromISO($('Preparar Agendar').item.json.startDateTime).setLocale('es').toFormat(\"EEEE, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\") }}\n\nRecibirás un recordatorio 30 minutos antes. ¡Te esperamos!",
+        "options_message": {}
+      },
+      "id": "wa014-0000-0000-0000-000000000014",
+      "name": "Respuesta Cita Agendada",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [2160, 80],
+      "credentials": { "evolutionApi": { "id": "6aCgScDhYrgRt176", "name": "Evolution account" } }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": { "__rl": true, "mode": "list", "value": "user@example.com", "cachedResultName": "Citas CIAP" },
+        "returnAll": true,
+        "timeMin": "={{ DateTime.fromISO($('Preparar Agendar').item.json.startDateTime).startOf('day').toISO() }}",
+        "timeMax": "={{ DateTime.fromISO($('Preparar Agendar').item.json.startDateTime).endOf('day').toISO() }}",
+        "options": {}
+      },
+      "id": "wa015-0000-0000-0000-000000000015",
+      "name": "Get eventos del dia",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [1640, 560],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const zone = 'America/Guayaquil';\nconst requestedISO = $('Preparar Agendar').item.json.startDateTime;\nconst requestedDT = DateTime.fromISO(requestedISO, { zone });\nconst date = requestedDT.toFormat('yyyy-MM-dd');\nconst weekday = requestedDT.weekday;\nconst startHour = 7;\nconst endHour = weekday === 6 ? 13 : 19;\nconst now = DateTime.now().setZone(zone);\nconst events = $items().map(i => i.json).filter(e => e.id);\nconst slots = [];\nfor (let h = startHour; h < endHour; h++) {\n  const slotStart = DateTime.fromFormat(`${date} ${String(h).padStart(2,'0')}:00`, 'yyyy-MM-dd HH:mm', { zone });\n  const slotEnd = slotStart.plus({ hours: 1 });\n  if (slotEnd <= now) continue;\n  const occupied = events.some(ev => {\n    const evStart = DateTime.fromISO(ev.start?.dateTime || ev.start?.date, { zone });\n    const evEnd = DateTime.fromISO(ev.end?.dateTime || ev.end?.date, { zone });\n    return slotStart < evEnd && slotEnd > evStart;\n  });\n  if (!occupied) slots.push(slotStart.toFormat('HH:mm'));\n}\nif (slots.length === 0) {\n  return { message: `😔 Lo siento, el día *${date}* no tiene más horarios disponibles.\\n\\nPor favor elige otro día y envía:\\n\\`agendar AAAA-MM-DD HH:MM Tu Nombre\\`` };\n}\nconst slotsText = slots.map(s => `• ${s}`).join('\\n');\nreturn { message: `⏰ Ese horario está ocupado.\\n\\n📅 Horarios libres para el *${date}*:\\n\\n${slotsText}\\n\\nResponde con:\\n\\`agendar ${date} HH:MM Tu Nombre\\`` };"
+      },
+      "id": "wa016-0000-0000-0000-000000000016",
+      "name": "Calcular slots libres",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1900, 560]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('data_citas').item.json.instance }}",
+        "remoteJid": "={{ $('data_citas').item.json.chatId }}",
+        "messageText": "={{ $json.message }}",
+        "options_message": {}
+      },
+      "id": "wa017-0000-0000-0000-000000000017",
+      "name": "Respuesta Slots Disponibles",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [2160, 560],
+      "credentials": { "evolutionApi": { "id": "6aCgScDhYrgRt176", "name": "Evolution account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.messageText.trim();\nconst parts = text.split(/\\s+/);\nif (parts.length < 4) {\n  return { valid: false, error: \"Faltan datos\\\\. Usa el formato:\\\\n`cancelar AAAA\\\\-MM\\\\-DD HH:MM Tu Nombre`\\\\n\\\\nEjemplo:\\\\n`cancelar 2025\\\\-09\\\\-22 15:00 Ana García`\" };\n}\nconst date = parts[1];\nconst time = parts[2];\nconst name = parts.slice(3).join(' ').trim();\nconst dateRegex = /^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$/;\nif (!dateRegex.test(date)) {\n  return { valid: false, error: `La fecha *${date}* no es válida\\\\. Usa: \\`AAAA\\\\-MM\\\\-DD\\`` };\n}\nconst timeRegex = /^([01]\\d|2[0-3]):[0-5]\\d$/;\nif (!timeRegex.test(time)) {\n  return { valid: false, error: `La hora *${time}* no es válida\\\\. Usa formato 24h: \\`HH:MM\\`` };\n}\nconst zone = 'America/Guayaquil';\nconst startDateTime = DateTime.fromFormat(`${date} ${time}`, 'yyyy-MM-dd HH:mm', { zone });\nif (!startDateTime.isValid) {\n  return { valid: false, error: `La fecha *${date}* no existe en el calendario\\\\.` };\n}\nconst oneYearAgo = DateTime.now().setZone(zone).minus({ years: 1 });\nif (startDateTime < oneYearAgo) {\n  return { valid: false, error: \"La fecha indicada es demasiado antigua\\\\. Solo puedes cancelar citas del último año\\\\.\" };\n}\nif (!name || name.split(' ').filter(w => w.length > 0).length < 2) {\n  return { valid: false, error: \"Escribe tu *nombre y apellido completos* como los registraste al agendar\\\\.\" };\n}\nif (/\\d/.test(name)) {\n  return { valid: false, error: \"El nombre no debe contener números\\\\.\" };\n}\nconst endDateTime = startDateTime.plus({ hours: 1 });\nreturn { valid: true, date, time, name, startDateTime: startDateTime.toISO(), endDateTime: endDateTime.toISO(), summary: `Cita para ${name}` };"
+      },
+      "id": "wa018-0000-0000-0000-000000000018",
+      "name": "Validar Cancelar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [424, 752]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "combinator": "and",
+          "conditions": [{ "id": "vc1", "operator": { "type": "boolean", "operation": "true", "singleValue": true }, "leftValue": "={{ $json.valid }}", "rightValue": "" }]
+        },
+        "options": {}
+      },
+      "id": "wa019-0000-0000-0000-000000000019",
+      "name": "¿Cancelar válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [664, 624]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('data_citas').item.json.instance }}",
+        "remoteJid": "={{ $('data_citas').item.json.chatId }}",
+        "messageText": "=⚠️ {{ $json.error }}\n\nIntenta de nuevo o escribe /start para ver los comandos.",
+        "options_message": {}
+      },
+      "id": "wa020-0000-0000-0000-000000000020",
+      "name": "Error formato cancelar",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [424, 496],
+      "credentials": { "evolutionApi": { "id": "6aCgScDhYrgRt176", "name": "Evolution account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const zone = 'America/Guayaquil';\nconst { date, time, name } = $input.first().json;\nconst startDateTime = DateTime.fromFormat(`${date} ${time}`, 'yyyy-MM-dd HH:mm', { zone });\nconst endDateTime = startDateTime.plus({ hours: 1 });\nreturn { name, summary: `Cita para ${name}`, startDateTime: startDateTime.toISO(), endDateTime: endDateTime.toISO() };"
+      },
+      "id": "wa021-0000-0000-0000-000000000021",
+      "name": "Preparar Cancelar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 752]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": { "__rl": true, "mode": "list", "value": "user@example.com", "cachedResultName": "Citas CIAP" },
+        "returnAll": true,
+        "timeMin": "={{ $json.startDateTime }}",
+        "timeMax": "={{ $json.endDateTime }}",
+        "options": {}
+      },
+      "id": "wa022-0000-0000-0000-000000000022",
+      "name": "Get many events1",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [1140, 752],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "combinator": "and",
+          "conditions": [{ "id": "if1c", "operator": { "type": "boolean", "operation": "true", "singleValue": true }, "leftValue": "={{ $json.isEmpty() }}", "rightValue": "" }]
+        },
+        "options": {}
+      },
+      "id": "wa023-0000-0000-0000-000000000023",
+      "name": "If1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1380, 752]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": { "__rl": true, "mode": "list", "value": "user@example.com", "cachedResultName": "Citas CIAP" },
+        "eventId": "={{ $json.id }}",
+        "options": {}
+      },
+      "id": "wa024-0000-0000-0000-000000000024",
+      "name": "Delete an event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [1640, 880]
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "mode": "list", "value": "1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM", "cachedResultName": "Citas Agendadas" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "gid=0", "cachedResultName": "Hoja 1" },
+        "filtersUI": { "values": [{ "lookupColumn": "id", "lookupValue": "={{ $('If1').item.json.id }}" }] },
+        "options": {}
+      },
+      "id": "wa025-0000-0000-0000-000000000025",
+      "name": "Buscar cita agendada",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [1900, 880]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": { "__rl": true, "mode": "list", "value": "1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM", "cachedResultName": "Citas Agendadas" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "gid=0", "cachedResultName": "Hoja 1" },
+        "startIndex": "={{ $json.row_number }}"
+      },
+      "id": "wa026-0000-0000-0000-000000000026",
+      "name": "Delete rows from sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [2160, 880]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('data_citas').item.json.instance }}",
+        "remoteJid": "={{ $('data_citas').item.json.chatId }}",
+        "messageText": "=✅ ¡Tu cita ha sido cancelada con éxito!",
+        "options_message": {}
+      },
+      "id": "wa027-0000-0000-0000-000000000027",
+      "name": "Respuesta Cita Cancelada",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [2420, 880],
+      "credentials": { "evolutionApi": { "id": "6aCgScDhYrgRt176", "name": "Evolution account" } }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('data_citas').item.json.instance }}",
+        "remoteJid": "={{ $('data_citas').item.json.chatId }}",
+        "messageText": "=❌ No se encontró ninguna cita con esos datos.\n\nVerifica la fecha, hora y nombre e intenta de nuevo.",
+        "options_message": {}
+      },
+      "id": "wa028-0000-0000-0000-000000000028",
+      "name": "Respuesta Cita no encontrada",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [1640, 592],
+      "credentials": { "evolutionApi": { "id": "6aCgScDhYrgRt176", "name": "Evolution account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.messageText.trim();\nconst parts = text.split(/\\s+/);\nif (parts.length < 2) {\n  return { valid: false, error: \"Escribe tu nombre después del comando\\\\.\\nEjemplo: `citas Ana García`\" };\n}\nconst name = parts.slice(1).join(' ').trim();\nif (name.split(' ').filter(w => w.length > 0).length < 2) {\n  return { valid: false, error: \"Escribe tu *nombre y apellido completos* para buscar tus citas\\\\.\\nEjemplo: `citas Ana García`\" };\n}\nif (/\\d/.test(name)) {\n  return { valid: false, error: \"El nombre no debe contener números\\\\. Escribe tu nombre completo\\\\.\" };\n}\nconst words = name.split(' ').filter(w => w.length > 0);\nif (words.some(w => w.length < 2)) {\n  return { valid: false, error: \"Cada parte del nombre debe tener al menos 2 letras\\\\. Escribe tu nombre completo\\\\.\" };\n}\nreturn { valid: true, name };"
+      },
+      "id": "wa029-0000-0000-0000-000000000029",
+      "name": "Validar Citas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [424, 1200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "combinator": "and",
+          "conditions": [{ "id": "vci1", "operator": { "type": "boolean", "operation": "true", "singleValue": true }, "leftValue": "={{ $json.valid }}", "rightValue": "" }]
+        },
+        "options": {}
+      },
+      "id": "wa030-0000-0000-0000-000000000030",
+      "name": "¿Citas válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [664, 1072]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('data_citas').item.json.instance }}",
+        "remoteJid": "={{ $('data_citas').item.json.chatId }}",
+        "messageText": "=⚠️ {{ $json.error }}\n\nIntenta de nuevo o escribe /start para ver los comandos.",
+        "options_message": {}
+      },
+      "id": "wa031-0000-0000-0000-000000000031",
+      "name": "Error formato citas",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [424, 944],
+      "credentials": { "evolutionApi": { "id": "6aCgScDhYrgRt176", "name": "Evolution account" } }
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "mode": "list", "value": "1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM", "cachedResultName": "Citas Agendadas" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "gid=0", "cachedResultName": "Hoja 1" },
+        "filtersUI": { "values": [{ "lookupColumn": "Nombre Cliente", "lookupValue": "={{ $json.name }}" }] },
+        "options": {}
+      },
+      "id": "wa033-0000-0000-0000-000000000033",
+      "name": "Buscar citas de cliente",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [900, 1200],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2 },
+          "combinator": "and",
+          "conditions": [{ "id": "if2c", "operator": { "type": "boolean", "operation": "true", "singleValue": true }, "leftValue": "={{ $json.isEmpty() }}", "rightValue": "" }]
+        },
+        "options": {}
+      },
+      "id": "wa034-0000-0000-0000-000000000034",
+      "name": "If2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1140, 1200]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('data_citas').item.json.instance }}",
+        "remoteJid": "={{ $('data_citas').item.json.chatId }}",
+        "messageText": "=🤔 No encontré ninguna cita agendada para *{{ $('Validar Citas').item.json.name }}*.",
+        "options_message": {}
+      },
+      "id": "wa035-0000-0000-0000-000000000035",
+      "name": "Respuesta Citas no encontradas",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [1380, 1072],
+      "credentials": { "evolutionApi": { "id": "6aCgScDhYrgRt176", "name": "Evolution account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const citas = $items().map(item => item.json);\nconst ahora = DateTime.now();\nconst citasFuturas = citas.filter(cita => {\n  const fechaCita = DateTime.fromISO(cita['Fecha ISO']);\n  return fechaCita > ahora;\n});\nif (citasFuturas.length === 0) {\n  const nombreCliente = citas[0]?.['Nombre Cliente'] || '';\n  return { message: `Hola, ${nombreCliente}. 👋 Tienes citas registradas pero ninguna próxima.` };\n}\nconst nombreCliente = citasFuturas[0]['Nombre Cliente'];\nlet mensaje = `¡Hola, ${nombreCliente}! 👋 Tus próximas citas:\\n\\n`;\nfor (const cita of citasFuturas) {\n  mensaje += `🗓️ ${cita['Fecha y hora']}\\n`;\n}\nreturn { message: mensaje };"
+      },
+      "id": "wa036-0000-0000-0000-000000000036",
+      "name": "Armar Respuesta Citas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1380, 1360]
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('data_citas').item.json.instance }}",
+        "remoteJid": "={{ $('data_citas').item.json.chatId }}",
+        "messageText": "={{ $json.message }}",
+        "options_message": {}
+      },
+      "id": "wa037-0000-0000-0000-000000000037",
+      "name": "Respuesta Lista Citas",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [1640, 1360],
+      "credentials": { "evolutionApi": { "id": "6aCgScDhYrgRt176", "name": "Evolution account" } }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('data_citas').item.json.instance }}",
+        "remoteJid": "={{ $('data_citas').item.json.chatId }}",
+        "messageText": "=🤔 No entendí tu mensaje.\n\nEscribe */start* para ver los comandos disponibles.",
+        "options_message": {}
+      },
+      "id": "wa038-0000-0000-0000-000000000038",
+      "name": "Respuesta Bot Defecto",
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [400, 1424],
+      "credentials": { "evolutionApi": { "id": "6aCgScDhYrgRt176", "name": "Evolution account" } }
+    },
+    {
+      "parameters": { "content": "## WhatsApp Trigger\nEvolution API Webhook — configura la URL en tu instancia de Evolution API.\n\nPath: `POST /webhook/citas-wa`", "height": 128, "width": 320, "color": 4 },
+      "id": "sn001-0000-0000-0000-000000000001", "name": "Note Trigger",
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [-440, 480]
+    },
+    {
+      "parameters": { "content": "## Módulo Agendar\nSi el horario está ocupado, calcula y muestra los slots libres del mismo día.", "height": 96, "width": 480, "color": 4 },
+      "id": "sn002-0000-0000-0000-000000000002", "name": "Note Agendar",
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [880, 160]
+    },
+    {
+      "parameters": { "content": "## Slots disponibles (NUEVO)\nSi el slot está ocupado → obtiene todos los eventos del día → calcula horas libres → responde con lista.", "height": 96, "width": 480, "color": 7 },
+      "id": "sn003-0000-0000-0000-000000000003", "name": "Note Slots",
+      "type": "n8n-nodes-base.stickyNote", "typeVersion": 1, "position": [1620, 432]
+    }
+  ],
+  "connections": {
+    "WA Trigger": {
+      "main": [[{ "node": "Filtrar grupos y propios", "type": "main", "index": 0 }]]
+    },
+    "Filtrar grupos y propios": {
+      "main": [[{ "node": "data_citas", "type": "main", "index": 0 }]]
+    },
+    "data_citas": {
+      "main": [[{ "node": "Switch", "type": "main", "index": 0 }]]
+    },
+    "Switch": {
+      "main": [
+        [{ "node": "Respuesta Bienvenida", "type": "main", "index": 0 }],
+        [{ "node": "Validar Agendar", "type": "main", "index": 0 }],
+        [{ "node": "Validar Cancelar", "type": "main", "index": 0 }],
+        [{ "node": "Validar Citas", "type": "main", "index": 0 }],
+        [{ "node": "Respuesta Bot Defecto", "type": "main", "index": 0 }]
+      ]
+    },
+    "Validar Agendar": {
+      "main": [[{ "node": "¿Agendar válido?", "type": "main", "index": 0 }]]
+    },
+    "¿Agendar válido?": {
+      "main": [
+        [{ "node": "Preparar Agendar", "type": "main", "index": 0 }],
+        [{ "node": "Error formato agendar", "type": "main", "index": 0 }]
+      ]
+    },
+    "Preparar Agendar": {
+      "main": [[{ "node": "Get many events", "type": "main", "index": 0 }]]
+    },
+    "Get many events": {
+      "main": [[{ "node": "¿Slot disponible?", "type": "main", "index": 0 }]]
+    },
+    "¿Slot disponible?": {
+      "main": [
+        [{ "node": "Create an event", "type": "main", "index": 0 }],
+        [{ "node": "Get eventos del dia", "type": "main", "index": 0 }]
+      ]
+    },
+    "Create an event": {
+      "main": [[{ "node": "Agregar cita en Google Sheets", "type": "main", "index": 0 }]]
+    },
+    "Agregar cita en Google Sheets": {
+      "main": [[{ "node": "Respuesta Cita Agendada", "type": "main", "index": 0 }]]
+    },
+    "Get eventos del dia": {
+      "main": [[{ "node": "Calcular slots libres", "type": "main", "index": 0 }]]
+    },
+    "Calcular slots libres": {
+      "main": [[{ "node": "Respuesta Slots Disponibles", "type": "main", "index": 0 }]]
+    },
+    "Validar Cancelar": {
+      "main": [[{ "node": "¿Cancelar válido?", "type": "main", "index": 0 }]]
+    },
+    "¿Cancelar válido?": {
+      "main": [
+        [{ "node": "Preparar Cancelar", "type": "main", "index": 0 }],
+        [{ "node": "Error formato cancelar", "type": "main", "index": 0 }]
+      ]
+    },
+    "Preparar Cancelar": {
+      "main": [[{ "node": "Get many events1", "type": "main", "index": 0 }]]
+    },
+    "Get many events1": {
+      "main": [[{ "node": "If1", "type": "main", "index": 0 }]]
+    },
+    "If1": {
+      "main": [
+        [{ "node": "Respuesta Cita no encontrada", "type": "main", "index": 0 }],
+        [{ "node": "Delete an event", "type": "main", "index": 0 }]
+      ]
+    },
+    "Delete an event": {
+      "main": [[{ "node": "Buscar cita agendada", "type": "main", "index": 0 }]]
+    },
+    "Buscar cita agendada": {
+      "main": [[{ "node": "Delete rows from sheet", "type": "main", "index": 0 }]]
+    },
+    "Delete rows from sheet": {
+      "main": [[{ "node": "Respuesta Cita Cancelada", "type": "main", "index": 0 }]]
+    },
+    "Validar Citas": {
+      "main": [[{ "node": "¿Citas válido?", "type": "main", "index": 0 }]]
+    },
+    "¿Citas válido?": {
+      "main": [
+        [{ "node": "Buscar citas de cliente", "type": "main", "index": 0 }],
+        [{ "node": "Error formato citas", "type": "main", "index": 0 }]
+      ]
+    },
+    "Buscar citas de cliente": {
+      "main": [[{ "node": "If2", "type": "main", "index": 0 }]]
+    },
+    "If2": {
+      "main": [
+        [{ "node": "Respuesta Citas no encontradas", "type": "main", "index": 0 }],
+        [{ "node": "Armar Respuesta Citas", "type": "main", "index": 0 }]
+      ]
+    },
+    "Armar Respuesta Citas": {
+      "main": [[{ "node": "Respuesta Lista Citas", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-05-03T00:00:00.000Z",
+  "versionId": "wa-citas-v1"
+}
