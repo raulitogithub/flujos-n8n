@@ -1,0 +1,3372 @@
+{
+  "name": "Agendamiento citas",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "9b477bc2-0fe7-4eee-a02d-cf95104eab52",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        -400,
+        624
+      ],
+      "webhookId": "ce4aa34d-496c-4802-a9a4-79a2f82a6833",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "3d67f2fa-ab68-4d63-92d5-98e39a74e654",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "/start"
+                  }
+                ]
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "82403d8b-6194-41ab-a033-06c9d5f2491e",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "agendar "
+                  }
+                ]
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "882a2a60-bf83-4195-8347-3d3fcbc43dec",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "cancelar "
+                  }
+                ]
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "id": "42e95cb5-de43-4724-bd5d-7521740b777d",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "citas "
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "cd0be3cd-688b-40c1-b75e-bf61166650c7",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -32,
+        576
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtenemos los datos del mensaje como antes\nconst text = $input.first().json.message.text;\nconst parts = text.split(' ');\nconst date = parts[1];\nconst time = parts[2];\nconst name = parts.slice(3).join(' ');\n\n// 1. Define tu zona horaria para evitar errores\nconst zone = 'America/Guayaquil';\n\n// 2. Creamos un objeto de fecha REAL a partir del texto, especificando el formato y la zona horaria\nconst startDateTime = DateTime.fromFormat(`${date} ${time}`, 'yyyy-MM-dd HH:mm', { zone });\n\n// 3. Calculamos la hora de fin (1 hora después) usando el objeto que creamos\nconst endDateTime = startDateTime.plus({ hours: 1 });\n\n// 4. Devolvemos los datos listos para Google Calendar en el formato que necesita (ISO)\nreturn {\n  name: name,\n  summary: `Cita para ${name} - Bot CIAP`,\n  startDateTime: startDateTime.toISO(),\n  endDateTime: endDateTime.toISO()\n};"
+      },
+      "id": "655e3a37-a8ee-4f77-a4e0-e189bd7e3b91",
+      "name": "Code in JavaScript",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        464,
+        336
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": "user@example.com",
+          "cachedResultName": "Citas CIAP"
+        },
+        "start": "={{ $('Code in JavaScript').item.json.startDateTime }}",
+        "end": "={{ $('Code in JavaScript').item.json.endDateTime }}",
+        "useDefaultReminders": false,
+        "additionalFields": {
+          "attendees": [],
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          },
+          "description": "Cita CIAP agendada con Bot",
+          "summary": "={{ $('Code in JavaScript').item.json.summary }}"
+        },
+        "remindersUi": {
+          "remindersValues": [
+            {
+              "method": "popup",
+              "minutes": 30
+            }
+          ]
+        }
+      },
+      "id": "0858b9ce-1bd5-4fe5-a70a-83880d9dabe2",
+      "name": "Create an event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        1200,
+        32
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=¡Tu cita ha sido agendada con éxito! ✅\n\n👤  *Nombre:* {{ $('Code in JavaScript').item.json.name }}\n\n📅  *Fecha y Hora:* {{ DateTime.fromISO($('Code in JavaScript').item.json.startDateTime).setLocale('es').toFormat(\"EEEE, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\") }}\n\nRecibirás un recordatorio. ¡Te esperamos!",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "8caa168f-7c5c-4764-8c42-0c2631318b9d",
+      "name": "Respuesta de Cita Agendada",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1744,
+        32
+      ],
+      "webhookId": "639d9005-77b2-4da6-b53f-38520880692f",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "¡Hola! 👋 ¡Bienvenido/a al Asistente Virtual de Citas!\n\nEstoy aquí para ayudarte a gestionar tus citas de forma rápida y sencilla.\n\n**🗓️ Para agendar una cita**\nUsa el siguiente formato exacto:\n`agendar AAAA-MM-DD HH:MM Tu Nombre Completo`\n\n*Ejemplo:*\n`agendar 2025-09-22 15:00 Ana Rodriguez`\n\n---\n\n**❌ Para cancelar una cita existente**\nUsa el mismo formato que usaste para agendar:\n`cancelar AAAA-MM-DD HH:MM Tu Nombre Completo`\n\n*Ejemplo:*\n`cancelar 2025-09-22 15:00 Ana Rodriguez`\n\n---\n\n**📋 Para ver tus próximas citas**\nSimplemente envía un mensaje con tu nombre:\n`citas Tu Nombre Completo`\n*Ejemplo: `citas Ana Rodriguez`*\n\nProcesaré tu solicitud y te enviaré una confirmación al instante.\n\nUna vez que envíes tu mensaje, procesaré tu solicitud y te enviaré una confirmación.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "f55c1f19-9055-437a-a46b-64d9feff80c9",
+      "name": "Respuesta Bot Inicial",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        304,
+        -160
+      ],
+      "webhookId": "00967852-8064-4df8-824c-450909e07b4e",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": "user@example.com",
+          "cachedResultName": "Citas CIAP"
+        },
+        "returnAll": true,
+        "timeMin": "={{ $json.startDateTime }}",
+        "timeMax": "={{ $json.endDateTime }}",
+        "options": {}
+      },
+      "id": "f36a924f-4a9c-495c-83b0-755bb77b27d1",
+      "name": "Get many events",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        736,
+        336
+      ],
+      "notesInFlow": false,
+      "retryOnFail": false,
+      "typeVersion": 1.3,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "e9199cc8-ccae-402f-9170-06d16542c4fa",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.isEmpty() }}",
+              "rightValue": 0
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5f53d3c8-622a-495e-a6c2-7435f2b253a0",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        960,
+        336
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "Lo siento, ese horario ya no está disponible.\n\n🗓️ Por favor, intenta con otra fecha u hora.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "ec82e169-cef1-4f9c-9112-3689023020b6",
+      "name": "Respuesta Hora no disponible",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1280,
+        352
+      ],
+      "webhookId": "4a92c516-17f6-4835-8186-f58923d6c5a2",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM/edit?usp=drivesdk",
+          "cachedResultName": "Citas Agendadas"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM/edit#gid=0",
+          "cachedResultName": "Hoja 1"
+        },
+        "columns": {
+          "value": {
+            "id": "={{ $json.id }}",
+            "Fecha ISO": "={{ $json.start.dateTime }}",
+            "Fecha y hora": "={{ DateTime.fromISO($('Code in JavaScript').item.json.startDateTime).setLocale('es').toFormat(\"EEEE, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\") }}",
+            "Nombre Cliente": "={{ $('Code in JavaScript').item.json.name }}"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "id",
+              "defaultMatch": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre Cliente",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Nombre Cliente",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha y hora",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Fecha y hora",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha ISO",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Fecha ISO",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "0a1c7bb7-9bc5-47f6-8117-093c6b82efc4",
+      "name": "Agregar cita en Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1456,
+        32
+      ],
+      "typeVersion": 4.7
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "🤔 No entendí tu mensaje.\n\nRecuerda los comandos disponibles:\n\n• Envía /start para ver el mensaje de bienvenida.\n• Para agendar una cita, usa el formato:\n`agendar AAAA-MM-DD HH:MM Tu Nombre Completo`",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "19522e57-07db-45b7-a274-409ef751555c",
+      "name": "Respuesta Bot Defecto",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        224,
+        1424
+      ],
+      "webhookId": "71933dd4-dc0a-4541-84ed-176de0d3fb75",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtenemos los datos del mensaje\nconst text = $input.first().json.message.text;\nconst parts = text.split(' ');\nconst date = parts[1];\nconst time = parts[2];\nconst name = parts.slice(3).join(' ');\n\n// Define tu zona horaria\nconst zone = 'America/Guayaquil'; // Asegúrate que sea la correcta\n\n// Creamos el objeto de fecha para buscar\nconst startDateTime = DateTime.fromFormat(`${date} ${time}`, 'yyyy-MM-dd HH:mm', { zone });\n\n// 3. Calculamos la hora de fin (1 hora después) usando el objeto que creamos\nconst endDateTime = startDateTime.plus({ hours: 1 });\n\n// Devolvemos los datos necesarios para la búsqueda\nreturn {\n  name: name,\n  summary: `Cita para ${name}`, // El título exacto que debe buscar\n  startDateTime: startDateTime.toISO(),\n  endDateTime: endDateTime.toISO()\n};"
+      },
+      "id": "e94803ab-a647-4944-933b-eddea9d3e61f",
+      "name": "Code in JavaScript1",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        480,
+        752
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": "user@example.com",
+          "cachedResultName": "Citas CIAP"
+        },
+        "returnAll": true,
+        "timeMin": "={{ $json.startDateTime }}",
+        "timeMax": "={{ $json.endDateTime }}",
+        "options": {}
+      },
+      "id": "2d9bd464-0384-48aa-9dc0-b5495d8af26d",
+      "name": "Get many events1",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        736,
+        752
+      ],
+      "notesInFlow": false,
+      "retryOnFail": false,
+      "typeVersion": 1.3,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "61e695f8-6364-4e01-9456-ee5937b41cc5",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.isEmpty() }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9658b627-8ee5-4bcb-ad03-f0152829cf00",
+      "name": "If1",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        960,
+        752
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "mode": "list",
+          "value": "user@example.com",
+          "cachedResultName": "Citas CIAP"
+        },
+        "eventId": "={{ $json.id }}",
+        "options": {}
+      },
+      "id": "80cbfb0c-9478-44a6-81b3-17ef42314ecc",
+      "name": "Delete an event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "position": [
+        1408,
+        880
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM/edit?usp=drivesdk",
+          "cachedResultName": "Citas Agendadas"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM/edit#gid=0",
+          "cachedResultName": "Hoja 1"
+        },
+        "startIndex": "={{ $json.row_number }}"
+      },
+      "id": "c884a528-9085-4fd5-ba12-138b8021a5d4",
+      "name": "Delete rows or columns from sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1968,
+        880
+      ],
+      "typeVersion": 4.7
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "✅ ¡Tu cita ha sido cancelada con éxito!",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "28594642-9e6e-48d5-bc7b-c24b86982dce",
+      "name": "Respuesta Cita Cancelada",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2256,
+        880
+      ],
+      "webhookId": "e0240442-2b19-49c8-b12e-41ca61aaa1c0",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "❌ No se encontró ninguna cita agendada con esos datos. Por favor, verifica la fecha, hora y nombre.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "2ec6dfca-2a0a-4b71-ab2b-8816fcc0690e",
+      "name": "Respuesta Cita no encontrada",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1408,
+        592
+      ],
+      "webhookId": "bbc52f68-77cd-46a6-9651-bbda539a00ec",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.message.text;\n\n// \"citas\" es la 0, el nombre empieza en la 1\nconst name = text.split(' ').slice(1).join(' '); \n\n// Preparamos el término de búsqueda exacto para el título del evento\nconst searchTerm = `Cita para ${name}`;\n\nreturn {\n  name: name,\n  searchTerm: searchTerm\n};"
+      },
+      "id": "bd9e6b4a-501c-40ec-a41a-a407301bc485",
+      "name": "Code in JavaScript2",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        512,
+        1200
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM/edit?usp=drivesdk",
+          "cachedResultName": "Citas Agendadas"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM/edit#gid=0",
+          "cachedResultName": "Hoja 1"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "id",
+              "lookupValue": "={{ $('If1').item.json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "63301a7e-d46e-486c-a6ce-e3b27cda70be",
+      "name": "Buscar cita agendada",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1712,
+        880
+      ],
+      "typeVersion": 4.7
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM/edit?usp=drivesdk",
+          "cachedResultName": "Citas Agendadas"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zDo2juIh2YkYZx1erqdhu5y5WC43iM0GV8LpMqov3UM/edit#gid=0",
+          "cachedResultName": "Hoja 1"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Nombre Cliente",
+              "lookupValue": "={{ $json.name }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8c527028-c49c-45b6-8f73-135baeb4ad2b",
+      "name": "Buscar citas de cliente",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        752,
+        1200
+      ],
+      "typeVersion": 4.7,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "62047214-0958-4dcb-9b5f-0ccc359ba9de",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.isEmpty() }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a7453716-d4e4-4900-b0c0-d8bb9956ca54",
+      "name": "If2",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1024,
+        1264
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=🤔 No encontré ninguna cita futura agendada para  {{ $('Code in JavaScript2').item.json.name }}. ",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "513474d6-7179-4f85-bda8-aeb31def3671",
+      "name": "Respuesta Citas no encontradas",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1392,
+        1120
+      ],
+      "webhookId": "be75226d-b30b-43ae-9d8a-8be8e6e41b53",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Recibe los datos que vienen del nodo IF.\n// Ya sabemos que no vienen vacíos, así que los procesamos directamente.\nconst citas = $items().map(item => item.json);\n\n// 2. Obtenemos la fecha y hora actual para comparar.\nconst ahora = DateTime.now();\n\n// 3. Filtramos para quedarnos solo con las citas futuras.\nconst citasFuturas = citas.filter(cita => {\n  // Convertimos la \"Fecha ISO\" de la hoja de cálculo a un objeto de fecha real.\n  const fechaCita = DateTime.fromISO(cita[\"Fecha ISO\"]);\n  // Devolvemos 'true' solo si la fecha de la cita es posterior a ahora.\n  return fechaCita > ahora;\n});\n\n// 4. Verificamos si, después de filtrar, nos quedamos sin citas.\nif (citasFuturas.length === 0) {\n  // Tomamos el nombre del cliente de los datos originales para el mensaje.\n  const nombreCliente = citas[0][\"Nombre Cliente\"];\n  return {\n    message: `Hola, ${nombreCliente}. 👋 Veo que tienes citas registradas en nuestro sistema, pero ninguna será en los próximos días.`\n  };\n}\n\n// 5. Si SÍ hay citas futuras, construimos el mensaje de respuesta.\nconst nombreCliente = citasFuturas[0][\"Nombre Cliente\"];\nlet mensaje = `¡Hola, ${nombreCliente}! 👋 Aquí tienes un resumen de tus próximas citas:\\n\\n`;\n\nfor (const cita of citasFuturas) {\n  // Usamos la columna \"Fecha y hora\" que ya tiene el formato amigable.\n  mensaje += `🗓️ ${cita[\"Fecha y hora\"]}\\n`;\n}\n\n// Devolvemos el mensaje final listo para ser enviado.\nreturn {\n  message: mensaje\n};"
+      },
+      "id": "6b4a8dd4-edfa-402d-a6d8-86b0b20f67b9",
+      "name": "Code in JavaScript3",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1392,
+        1360
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.chat.id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "0c3c01dd-30a7-456e-9fb8-318693be2f02",
+      "name": "Respuesta de Cita Agendada1",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1664,
+        1360
+      ],
+      "webhookId": "ac82b248-53cc-48db-be95-ab62408e5bdf",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "content": "## Start Point \nTelegram Trigger to listen the new messages from the users",
+        "height": 128,
+        "width": 256,
+        "color": 4
+      },
+      "id": "e9dce90d-b60f-4a26-b1e7-72a31a3aab63",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -736,
+        624
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Commands Options \n**Switch** for control the command send for the user (/help, agendar, cancelar, citas)",
+        "height": 128,
+        "width": 256,
+        "color": 5
+      },
+      "id": "18ab4e97-3e65-40bf-89e9-102faa134d2d",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        416
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Help Response\nInformation about the Bot's functions",
+        "height": 112,
+        "width": 208
+      },
+      "id": "5fed64b1-2b33-4bde-b152-9ab81ceb4285",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        512,
+        -160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## \"Agendar\" Module \nFlow to schedule a appointment with Telegram Bot and register on Google Calendar and Google Sheets",
+        "height": 112,
+        "width": 464,
+        "color": 4
+      },
+      "id": "cea583e2-6e5d-4b94-afb2-0f96dc0cd259",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        544,
+        144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## \"Cancelar\" Module \nFlow to cancel a appointment with Telegram Bot and register this change deleting on Google Calendar and Google Sheets",
+        "height": 112,
+        "width": 464,
+        "color": 3
+      },
+      "id": "d352e4af-0f61-448e-868a-bad9f3a16796",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        576,
+        592
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## \"Citas\" Module \nFlow to check all the appointments from a user",
+        "height": 80,
+        "width": 464,
+        "color": 2
+      },
+      "id": "8cd4779d-6701-4264-abdf-7efe454163e3",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        608,
+        1072
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Default Response \nBot's Response for unexpected messages",
+        "height": 96,
+        "width": 320,
+        "color": 2
+      },
+      "id": "1d7aadc3-05a4-4d13-b004-7ac9f4d77b2b",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        432,
+        1456
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.message.text.trim();\nconst parts = text.split(/\\s+/);\n\n// 1. Minimum parts: agendar fecha hora nombre...\nif (parts.length < 4) {\n  return { valid: false, error: \"Faltan datos\\\\. Usa el formato exacto:\\\\n`agendar AAAA\\\\-MM\\\\-DD HH:MM Tu Nombre`\\\\n\\\\nEjemplo:\\\\n`agendar 2025\\\\-09\\\\-22 15:00 Ana García`\" };\n}\n\nconst date = parts[1];\nconst time = parts[2];\nconst name = parts.slice(3).join(' ').trim();\n\n// 2. Date format YYYY-MM-DD\nconst dateRegex = /^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$/;\nif (!dateRegex.test(date)) {\n  return { valid: false, error: `La fecha *${date}* no es válida\\\\.\\nUsa el formato: \\`AAAA\\\\-MM\\\\-DD\\`\\nEjemplo: \\`2025\\\\-09\\\\-22\\`` };\n}\n\n// 3. Time format HH:MM (24h)\nconst timeRegex = /^([01]\\d|2[0-3]):[0-5]\\d$/;\nif (!timeRegex.test(time)) {\n  return { valid: false, error: `La hora *${time}* no es válida\\\\.\\nUsa formato 24h: \\`HH:MM\\`\\nEjemplo: \\`15:00\\`` };\n}\n\n// 4. Valid calendar date (e.g. not 2025-02-30)\nconst zone = 'America/Guayaquil';\nconst startDateTime = DateTime.fromFormat(`${date} ${time}`, 'yyyy-MM-dd HH:mm', { zone });\nif (!startDateTime.isValid) {\n  return { valid: false, error: `La fecha *${date}* no existe en el calendario\\\\. Verifica el día del mes\\\\.` };\n}\n\n// 5. Not in the past\nif (startDateTime < DateTime.now().setZone(zone)) {\n  return { valid: false, error: `La fecha *${date} ${time}* ya pasó\\\\. Por favor elige una fecha y hora futura\\\\.` };\n}\n\n// 6. Business hours: Mon-Fri 07:00-19:00, Sat 07:00-13:00\nconst weekday = startDateTime.weekday; // 1=Mon ... 7=Sun\nconst hour = startDateTime.hour;\nconst minute = startDateTime.minute;\nconst timeInMin = hour * 60 + minute;\nif (weekday === 7) {\n  return { valid: false, error: \"No atendemos los *domingos*\\\\. Elige un día de lunes a sábado\\\\.\" };\n}\nif (weekday === 6 && timeInMin > 13*60) {\n  return { valid: false, error: \"Los sábados atendemos hasta las *13:00*\\\\. Elige otro horario\\\\.\" };\n}\nif (timeInMin < 7*60 || timeInMin > 19*60) {\n  return { valid: false, error: \"Horario de atención: *lunes a viernes 07:00\\\\-19:00*, *sábados 07:00\\\\-13:00*\\\\.\" };\n}\n\n// 7. Name: at least 2 words, no numbers\nif (!name || name.split(' ').filter(w => w.length > 0).length < 2) {\n  return { valid: false, error: \"Por favor escribe tu *nombre y apellido completos*\\\\.\\nEjemplo: `agendar 2025\\\\-09\\\\-22 15:00 Ana García`\" };\n}\nif (/\\d/.test(name)) {\n  return { valid: false, error: \"El nombre no debe contener números\\\\. Escribe tu nombre completo\\\\.\" };\n}\n\nconst endDateTime = startDateTime.plus({ hours: 1 });\n\nreturn {\n  valid: true,\n  date, time, name,\n  startDateTime: startDateTime.toISO(),\n  endDateTime: endDateTime.toISO(),\n  summary: `Cita para ${name} - Bot CIAP`\n};"
+      },
+      "id": "07030d41-f051-4397-940c-d96a20dfd1b5",
+      "name": "Validar Agendar",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        224,
+        336
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "val-agendar-if-cond",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e05841b8-6375-40ca-8193-2836f96f14b0",
+      "name": "¿Agendar válido?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        464,
+        208
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=⚠️ {{ $json.error }}\n\nIntenta de nuevo o escribe /start para ver los comandos\\.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "85e3543e-24a4-4cb8-a837-e2b35d31e8a0",
+      "name": "Error formato agendar",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        224,
+        80
+      ],
+      "webhookId": "0ca0c033-f1a2-4dd8-b33d-f49a784e2bd7",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.message.text.trim();\nconst parts = text.split(/\\s+/);\n\n// 1. Minimum parts\nif (parts.length < 4) {\n  return { valid: false, error: \"Faltan datos\\\\. Usa el formato:\\\\n`cancelar AAAA\\\\-MM\\\\-DD HH:MM Tu Nombre`\\\\n\\\\nEjemplo:\\\\n`cancelar 2025\\\\-09\\\\-22 15:00 Ana García`\" };\n}\n\nconst date = parts[1];\nconst time = parts[2];\nconst name = parts.slice(3).join(' ').trim();\n\n// 2. Date format\nconst dateRegex = /^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$/;\nif (!dateRegex.test(date)) {\n  return { valid: false, error: `La fecha *${date}* no es válida\\\\. Usa: \\`AAAA\\\\-MM\\\\-DD\\`` };\n}\n\n// 3. Time format\nconst timeRegex = /^([01]\\d|2[0-3]):[0-5]\\d$/;\nif (!timeRegex.test(time)) {\n  return { valid: false, error: `La hora *${time}* no es válida\\\\. Usa formato 24h: \\`HH:MM\\`` };\n}\n\n// 4. Valid calendar date\nconst zone = 'America/Guayaquil';\nconst startDateTime = DateTime.fromFormat(`${date} ${time}`, 'yyyy-MM-dd HH:mm', { zone });\nif (!startDateTime.isValid) {\n  return { valid: false, error: `La fecha *${date}* no existe en el calendario\\\\.` };\n}\n\n// 5. Not more than 1 year in the past (reasonable search window)\nconst oneYearAgo = DateTime.now().setZone(zone).minus({ years: 1 });\nif (startDateTime < oneYearAgo) {\n  return { valid: false, error: \"La fecha indicada es demasiado antigua\\\\. Solo puedes cancelar citas del último año\\\\.\" };\n}\n\n// 6. Name validation\nif (!name || name.split(' ').filter(w => w.length > 0).length < 2) {\n  return { valid: false, error: \"Escribe tu *nombre y apellido completos* como los registraste al agendar\\\\.\" };\n}\nif (/\\d/.test(name)) {\n  return { valid: false, error: \"El nombre no debe contener números\\\\.\" };\n}\n\nconst endDateTime = startDateTime.plus({ hours: 1 });\n\nreturn {\n  valid: true,\n  date, time, name,\n  startDateTime: startDateTime.toISO(),\n  endDateTime: endDateTime.toISO(),\n  summary: `Cita para ${name}`\n};"
+      },
+      "id": "e498e2af-edfa-4672-a6d6-3440db3b3aec",
+      "name": "Validar Cancelar",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        224,
+        752
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "val-cancelar-if-cond",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c2f3fbdb-574e-4bc4-8b84-818e3fbdbe16",
+      "name": "¿Cancelar válido?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        464,
+        624
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=⚠️ {{ $json.error }}\n\nIntenta de nuevo o escribe /start para ver los comandos\\.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "e696f33f-cf11-41e2-bffc-d16fc1af49da",
+      "name": "Error formato cancelar",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        224,
+        496
+      ],
+      "webhookId": "9130ebc7-4fa2-4ce3-b784-d78ca76bdf59",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.message.text.trim();\nconst parts = text.split(/\\s+/);\n\n// 1. Must have a name after \"citas\"\nif (parts.length < 2) {\n  return { valid: false, error: \"Escribe tu nombre después del comando\\\\.\\nEjemplo: `citas Ana García`\" };\n}\n\nconst name = parts.slice(1).join(' ').trim();\n\n// 2. At least 2 words\nif (name.split(' ').filter(w => w.length > 0).length < 2) {\n  return { valid: false, error: \"Escribe tu *nombre y apellido completos* para buscar tus citas\\\\.\\nEjemplo: `citas Ana García`\" };\n}\n\n// 3. No numbers\nif (/\\d/.test(name)) {\n  return { valid: false, error: \"El nombre no debe contener números\\\\. Escribe tu nombre completo\\\\.\" };\n}\n\n// 4. Minimum length per word (avoid single letters like \"a b\")\nconst words = name.split(' ').filter(w => w.length > 0);\nif (words.some(w => w.length < 2)) {\n  return { valid: false, error: \"Cada parte del nombre debe tener al menos 2 letras\\\\. Escribe tu nombre completo\\\\.\" };\n}\n\nreturn { valid: true, name };"
+      },
+      "id": "5352d2b2-6b91-4776-a1eb-f57f6d7272f1",
+      "name": "Validar Citas",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        224,
+        1200
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "val-citas-if-cond",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8f180b3c-1905-48dc-904c-5e44e9f7b563",
+      "name": "¿Citas válido?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        464,
+        1072
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=⚠️ {{ $json.error }}\n\nIntenta de nuevo o escribe /start para ver los comandos\\.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "ecec0290-43dc-4e0b-a8b2-874b4d2ec940",
+      "name": "Error formato citas",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        224,
+        944
+      ],
+      "webhookId": "12c074cf-8a7d-44c3-ad4d-73ce02f286a0",
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "seleccion",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -7456,
+        1344
+      ],
+      "id": "52d7162d-9b26-4cc4-a5c8-f4b81818e70c",
+      "name": "whatsaap2",
+      "webhookId": "f6567cfa-8e95-4aff-96b5-611451fa3973"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b9dbaef8-88a1-42a6-8079-cc1af3b2b21b",
+              "leftValue": "={{ $('whatsaap2').item.json.body.data.key.senderPn }}",
+              "rightValue": "=593984563874@s.whatsapp.net",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "8649dece-6751-4311-abcd-13bd00ef7394",
+              "leftValue": "={{ $('whatsaap2').item.json.body.data.key.remoteJid }}",
+              "rightValue": "=593984563874@s.whatsapp.net",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -7264,
+        1056
+      ],
+      "id": "d6d8152b-4a7a-4b59-a550-ae0343dfe501",
+      "name": "Filter4"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -6352,
+        1360
+      ],
+      "id": "a362f4b8-69b1-486b-b31a-4ca3e9c8a9bb",
+      "name": "Wait6",
+      "webhookId": "4d4b2526-ed43-4205-8365-3ee6f11cb10b",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "chat-api",
+        "operation": "read-messages",
+        "instanceName": "={{ $json.instance }}",
+        "remoteJid": "={{ $json.number_sent }}",
+        "messageId": "={{ $json.id_message }}"
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -6176,
+        1360
+      ],
+      "id": "931d042e-60fb-42e2-9324-02f0dfd9cf5e",
+      "name": "message_read2",
+      "credentials": {
+        "evolutionApi": {
+          "id": "6aCgScDhYrgRt176",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('data2').item.json.message_type }}",
+                    "rightValue": "conversation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2565749f-e5b1-4709-be6b-d61f9ecb692e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a402e3d2-5d4d-48e2-acd5-2ff31a96df3f",
+                    "leftValue": "={{ $('data2').item.json.message_type }}",
+                    "rightValue": "audioMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "208ff5bc-6c9e-4c1d-8ad1-b31d3d00ee7a",
+                    "leftValue": "={{ $('data2').item.json.message_type }}",
+                    "rightValue": "imageMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "images"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2b8fcb42-19fb-4e17-ac47-24632d93c69c",
+                    "leftValue": "={{ $('data2').item.json.message_type }}",
+                    "rightValue": "documentMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "documents"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -5968,
+        1360
+      ],
+      "id": "b216cd39-7153-4c9c-aef0-cff6079dd752",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "Aqui hay una imagen enviada por el usuario. Describe la imagen y trasncribe cualquier texto visible en ella. Proporciona tantos detalles como sea posible",
+        "inputType": "base64",
+        "options": {
+          "detail": "auto"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -5104,
+        1408
+      ],
+      "id": "1ff45ae7-d375-4ed3-b168-a6488760a2cf",
+      "name": "Analyze_image2",
+      "credentials": {
+        "openAiApi": {
+          "id": "UXXrLJLlPlx5EXol",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8dfa2607-1705-4c56-847c-cc1d6ca90c0c",
+              "name": "input",
+              "value": "=<image>\n{{ $json['0'].content[0].text }}\n</image>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4864,
+        1408
+      ],
+      "id": "d78f57ac-6f62-487a-a587-1606b69a0e37",
+      "name": "images_data2"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data",
+        "options": {
+          "mimeType": "image/webp"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -5360,
+        1408
+      ],
+      "id": "9295a3d2-2fd4-45e8-87e5-4dae1b2b0d64",
+      "name": "Convert to image2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "402ad12c-599e-42cc-92e5-936165ca6f7b",
+              "name": "data",
+              "value": "={{ $('whatsaap2').item.json.body.data.message.base64 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5568,
+        1408
+      ],
+      "id": "0cdd6b11-1aee-4333-8a9f-1b4effa0923f",
+      "name": "base_64_images2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "402ad12c-599e-42cc-92e5-936165ca6f7b",
+              "name": "data",
+              "value": "={{ $('whatsaap2').item.json.body.data.message.base64 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5568,
+        1264
+      ],
+      "id": "3a762094-a780-47ec-856d-e3fbb89547fe",
+      "name": "base_64_audio2"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data",
+        "options": {
+          "fileName": "={{ $('whatsaap2').item.json.body.data.message.documentMessage.fileName }}",
+          "mimeType": "={{ $('whatsaap2').item.json.body.data.message.documentMessage.mimetype }}"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -5376,
+        1584
+      ],
+      "id": "84fc8e0f-3a58-43f9-99ab-762df46b627d",
+      "name": "Convert to documents2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "402ad12c-599e-42cc-92e5-936165ca6f7b",
+              "name": "data",
+              "value": "={{ $('whatsaap2').item.json.body.data.message.base64 }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5568,
+        1584
+      ],
+      "id": "e02de403-a6dc-4d65-97ed-87dcb7cfb6e0",
+      "name": "base_64_documents2"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "data",
+        "options": {
+          "mimeType": "audio/wav"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -5360,
+        1264
+      ],
+      "id": "309814e4-9aca-4e2d-bbc9-6d7c20443e49",
+      "name": "Convert to mp4"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -5088,
+        1232
+      ],
+      "id": "6215e13d-e661-48f6-890c-7f729e842591",
+      "name": "Transcribe a recording2",
+      "credentials": {
+        "openAiApi": {
+          "id": "UXXrLJLlPlx5EXol",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8dfa2607-1705-4c56-847c-cc1d6ca90c0c",
+              "name": "input",
+              "value": "=<audio>\n{{ $json.text }}\n</audio>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4864,
+        1232
+      ],
+      "id": "6b1bc982-5db7-4f0f-96f3-677fe005edcb",
+      "name": "audio2"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5",
+          "mode": "list",
+          "cachedResultName": "GPT-5"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Aqui hay un archivo enviado por el usuario. Describe el archivo y trasncribe cualquier texto visible en ella. Proporciona tantos detalles como sea posible"
+            },
+            {
+              "type": "file",
+              "fileType": "base64",
+              "fileName": "={{ $('whatsaap2').item.json.body.data.message.documentMessage.fileName }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -5168,
+        1584
+      ],
+      "id": "07e4412c-350b-4b3a-b395-1081dd8a6dd7",
+      "name": "Message a model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "UXXrLJLlPlx5EXol",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8dfa2607-1705-4c56-847c-cc1d6ca90c0c",
+              "name": "input",
+              "value": "=<archivo>\n{{ $json.output[0].content[0].text }}\n</archivo>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4848,
+        1584
+      ],
+      "id": "47dcab63-a652-4e92-8676-de6787da8c9f",
+      "name": "archivo2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8dfa2607-1705-4c56-847c-cc1d6ca90c0c",
+              "name": "input",
+              "value": "={{ $json.input }}",
+              "type": "string"
+            },
+            {
+              "id": "c4df06ab-f6ec-4dde-9c15-42414c2c7bc4",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4576,
+        1376
+      ],
+      "id": "ca908b38-e5a6-48a2-af2a-6b8d015d9fbd",
+      "name": "input2"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -4128,
+        1376
+      ],
+      "id": "475ac0f5-0f61-48b9-bac7-6fa2dbb4ac38",
+      "name": "Wait7",
+      "webhookId": "3bc0e62c-6ca5-4f09-a139-4db425dfaba7",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "messages",
+        "key": "={{ $('data2').item.json.number_sent }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -3968,
+        1488
+      ],
+      "id": "4ae93cd7-8e58-4652-8a9a-f21e7677529b",
+      "name": "Redis2",
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "773d145d-2048-49fd-ba05-8ad44f193a62",
+              "leftValue": "={{ $json.messages.last() }}",
+              "rightValue": "={{ $('input2').item.json.input }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3712,
+        1376
+      ],
+      "id": "4ac478be-4212-4eef-b371-1f62ec2c2d8a",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('data2').item.json.number_sent }}",
+        "messageData": "={{ $json.input }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4352,
+        1376
+      ],
+      "id": "0dd7b3f2-98cb-40e5-a210-1b11d99f6df2",
+      "name": "record message2",
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c781321d-52fa-420d-ad1d-0dccd1bfc475",
+              "name": "message_user",
+              "value": "={{ $json.messages.join('\\n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3504,
+        1280
+      ],
+      "id": "072becd6-08b4-4fc1-a505-ac104a674472",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Mensaje del usuario: {{ $json.message_user }}\nFecha actual: {{ $now }}",
+        "options": {
+          "systemMessage": "ROLE: Senior Industrial Maintenance Specialist - STN Cerámica (Spain)\nIDENTITY & SCOPE\nEres un agente de IA especializado en mantenimiento industrial para la fábrica STN Cerámica. Tu conocimiento se limita estrictamente a manuales técnicos, operación y averías de maquinaria cerámica (Prensas PH, Hornos F-Series, Atomizadores A-500).\n\nFlexibilidad: Si el usuario pregunta algo fuera de tema, responde brevemente y añade: \"Volviendo al mantenimiento...\" para retomar el hilo técnico.\n\nDYNAMIC PROTOCOL (STRICT FLOW CONTROL)\n1. REGLA DE ORO: UN SOLO BLOQUE DE TEXTO\n\nPROHIBIDO enviar múltiples mensajes o párrafos largos.\n\nPROHIBIDO enumerar pasos que requieran respuesta del usuario en el mismo mensaje.\n\nGenera estrictamente UNA SOLA pregunta o instrucción por cada respuesta y detente.\n\n2. INTERROGACIÓN PAUSADA (PASO A PASO)\n\nPaso 1: Si se reporta una avería, pregunta únicamente la Zona afectada (precalentamiento, cocción o enfriamiento). Detente.\n\nPaso 2: Una vez recibida la zona, pregunta el Tipo de falla. Detente.\n\nPaso 3: Pide la Confirmación del equipo solo si no se ha mencionado antes. Detente.\n\nNunca te adelantes pidiendo dos datos a la vez.\n\n3. MEMORIA DE SESIÓN (POSTGRES)\n\nConsulta siempre el historial antes de responder.\n\nSi el usuario ya proporcionó un dato (ej: ya dijo que es un Horno F-Series), no lo vuelvas a preguntar. Pasa directamente al siguiente dato faltante.\n\nOPERATIONAL RULES\nFormato WhatsApp: Usa emojis, negritas para nombres de máquinas y oraciones muy cortas (máximo 3-4 líneas).\n\nSin código: Responde siempre en texto plano. Prohibido usar JSON o bloques de código en la respuesta final.\n\nSeguridad: Antes de sugerir cualquier intervención física, incluye la advertencia: ⚠️ ¡ATENCIÓN! Aplicar protocolo LOTO y usar EPIs correspondientes.\n\nCRITICAL FAULT PROTOCOL (RED ALERT)\nSi el usuario menciona \"Falla de Integridad Estructural\" o \"Fallo Total de Enfriamiento\":\n\nClasifica como: GRAVEDAD CRÍTICA.\n\nResponde iniciando con el tag: [TRIGGER_SUPERVISOR_ALERT]\n\nAñade: \"GRAVEDAD CRÍTICA detectada en [Nombre de Máquina]. Iniciando evacuación. Supervisor notificado.\"\n\nNo pidas más datos técnicos ni confirmaciones en este estado.\n\nCORE KNOWLEDGE\nPrensa Hidráulica (PH): Juntas tóricas, electroválvulas, filtros (500h).\n\nHorno de Rodillos (F-Series): Bloqueo de rodillos, lubricación de cadenas (1000h).\n\nAtomizador (A-500): Desgaste de boquillas de inyección.\n\nINSTRUCCIÓN FINAL\nResponde siempre en español. Mantén un tono profesional, técnico y enfocado en la seguridad. Si detectas que el historial está cerca de reiniciarse (bloque de 4h), prioriza cerrar la instrucción técnica actual. No coloque emogis\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -3840,
+        880
+      ],
+      "id": "c8eeaef9-221b-491b-bc30-948d32bffc99",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5",
+          "mode": "list",
+          "cachedResultName": "gpt-5"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -3072,
+        1504
+      ],
+      "id": "f4cdd2bc-e804-4c8c-97cd-9ef58b97a892",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "UXXrLJLlPlx5EXol",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('data2').item.json.number_sent }}_B{{ new Date().getHours() }}_{{ Math.floor(new Date().getMinutes() / 30) }}",
+        "tableName": "n8n_chat_whatsaap"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -3280,
+        1488
+      ],
+      "id": "89de95ca-e39b-4df8-9f9a-91a528fd7a2d",
+      "name": "Postgres Chat Memory2",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "credentials": {
+        "postgres": {
+          "id": "vzwy5ryhnR3mTa4I",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Procesa el siguiente mensaje {{ $json.output }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "={{ $json.output }}"
+            },
+            {
+              "message": "=# Instrucciones para Formatear Mensajes para WhatsApp\\n\\nActúa como un experto en comunicación digital especializado en WhatsApp Business. Tu tarea es tomar cualquier mensaje largo y reorganizarlo en múltiples mensajes optimizados para WhatsApp, manteniendo TODA la información original.\\n\\n## Reglas de formateo:\\n\\n### Estructura general:\\n1. *Mensaje 1: Introducción + datos básicos (mantener el saludo/contexto original)\\n2. **Mensaje 2: Características principales\\n3. **Mensaje 3: Servicios y políticas\\n4. **Mensajes 4-N: Una imagen por mensaje con descripción breve\\n5. **Mensaje final*: Call to action (mantener la pregunta original)\\n\\n### Formato de cada mensaje:\\n- Máximo 3-4 líneas por mensaje\\n- Usar emojis relevantes para hacer más visual\\n- Mantener el tono original del mensaje\\n- NO perder ningún dato: direcciones, capacidades, horarios, etc.\\n- Agrupar imágenes por categorías.\\n\\n### Para las imágenes:\\n- Una imagen por mensaje cuando sea posible\\n- Si son de la misma categoría, máximo 2 por mensaje\\n- Agregar descripción breve antes de cada imagen/grupo\\n\\n### Preservar:\\n- El saludo/contexto inicial completo\\n- Todos los datos técnicos (direcciones, capacidades, horarios)\\n- El call to action final\\n- El tono de comunicación original\\n\\n## Formato de salida:\\nDevuelve SIEMPRE un JSON con esta estructura exacta:\\n\\n⁠  json\\n{\\n  \\\"respuesta\\\": [\\n    \\\"Texto del primer mensaje\\\",\\n    \\\"Texto del segundo mensaje\\\", \\n    \\\"https://files.catbox.moe/imagen1.jpeg\\\",\\n    \\\"Texto con descripción de siguiente imagen\\\",\\n    \\\"https://files.catbox.moe/imagen2.jpeg\\\",\\n    \\\"Texto del mensaje final\\\"\\n  ]\\n}\\n  ⁠\\n\\n### Reglas para el JSON:\\n- Cada elemento del array es un mensaje individual\\n- Cuando sea una imagen, solo incluir la URL sin texto adicional\\n- Mantener el orden lógico: introducción → características → servicios → imágenes → call to action\\n- NO agregar texto explicativo fuera del JSON\\n- NO numerar los mensajes en el JSON\\n\\n## Ejemplo:\\nINPUT: [Mensaje largo con información]\\nOUTPUT: JSON con array de respuestas listo para WhatsApp\""
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -2944,
+        1280
+      ],
+      "id": "6e050cf3-df34-40ef-b14a-c958aba0134d",
+      "name": "Basic LLM Chain2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"respuesta\": []\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -2800,
+        1488
+      ],
+      "id": "31bcc1d3-79b1-4975-a363-0d842610b2d9",
+      "name": "Structured Output Parser2",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.respuesta",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -2592,
+        1280
+      ],
+      "id": "beab9e5e-f478-469f-92b5-4f08e6a86a3c",
+      "name": "split output2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -2384,
+        1280
+      ],
+      "id": "eefec7cb-a61e-43ff-81ea-67ea8c1ec4e6",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b467c0e4-b210-428f-8a78-a6c4b73e6d3e",
+              "leftValue": "={{ $json['output.respuesta'] }}",
+              "rightValue": "png",
+              "operator": {
+                "type": "string",
+                "operation": "endsWith"
+              }
+            },
+            {
+              "id": "12b91b02-0dbb-405e-98a5-e834413a759a",
+              "leftValue": "={{ $json['output.respuesta'] }}",
+              "rightValue": "jpg",
+              "operator": {
+                "type": "string",
+                "operation": "endsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2176,
+        1488
+      ],
+      "id": "c19da981-e6de-4d2d-9114-f57386404809",
+      "name": "If5"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('data2').item.json.instance }}",
+        "remoteJid": "={{ $('data2').item.json.number_sent }}",
+        "messageText": "={{ $json['output.respuesta'] }}",
+        "options_message": {
+          "delay": "={{ $json['output.respuesta'].length * 45 }}"
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -1840,
+        1520
+      ],
+      "id": "051ceb13-0fd4-4c32-894c-a02480fb3af3",
+      "name": "Enviar texto2",
+      "credentials": {
+        "evolutionApi": {
+          "id": "6aCgScDhYrgRt176",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -1616,
+        1424
+      ],
+      "id": "59d6bd65-119b-454f-a92a-4822ee6d6bab",
+      "name": "Wait8",
+      "webhookId": "a21e17c5-1be4-431c-941e-7e0aa60072df",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -2176,
+        1184
+      ],
+      "id": "a7ccc29f-8188-46ca-a1b1-8da2bf90d874",
+      "name": "Aggregate2"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('data2').item.json.number_sent }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1968,
+        1184
+      ],
+      "id": "9a178af3-3915-4816-bd19-7c8b25f85495",
+      "name": "Borrarmensaje2",
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "71002f85-b212-4c8d-ae77-90cf49f2add8",
+              "name": "input",
+              "value": "={{ $('data2').item.json.message_text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4880,
+        1072
+      ],
+      "id": "32ff1d09-d5f0-4445-bae4-c884cd99328c",
+      "name": "texto2"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "operation": "send-image",
+        "instanceName": "={{ $('data2').item.json.instance }}",
+        "remoteJid": "={{ $('data2').item.json.number_sent }}",
+        "media": "={{ $json['output.respuesta'] }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -1872,
+        1312
+      ],
+      "id": "91a2aecf-4d41-48a0-a512-8aad27ebb5a6",
+      "name": "Enviarimagen2",
+      "credentials": {
+        "evolutionApi": {
+          "id": "6aCgScDhYrgRt176",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8649dece-6751-4311-abcd-13bd00ef7394",
+              "leftValue": "={{ $('whatsaap2').item.json.body.data.key.remoteJid }}",
+              "rightValue": "=@g.us",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -7216,
+        1360
+      ],
+      "id": "4d86c344-a466-4c84-be36-64f3630f7539",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8649dece-6751-4311-abcd-13bd00ef7394",
+              "leftValue": "={{ $json.body.event }}",
+              "rightValue": "=messages.upsert",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "45bf6fde-3fb4-462e-8485-6fea40677e8a",
+              "leftValue": "={{ $json.body.data.key.fromMe }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -7360,
+        1584
+      ],
+      "id": "edb5eeeb-a2c1-4a29-a17f-f79e03559d0f",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('whatsaap2').item.json.body.instance }}",
+        "remoteJid": "={{ $('data2').item.json.number_sent }}",
+        "messageText": "={{ $json.output }}",
+        "options_message": {
+          "delay": 1200
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -2944,
+        976
+      ],
+      "id": "12457381-762c-413f-bc65-e7e42cadf3d1",
+      "name": "Enviar texto3",
+      "credentials": {
+        "evolutionApi": {
+          "id": "6aCgScDhYrgRt176",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('whatsaap2').item.json.body.instance }}",
+        "remoteJid": "={{ $('data2').item.json.number_sent }}",
+        "messageText": "={{ $json.output }}",
+        "options_message": {
+          "delay": 1200
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -3088,
+        832
+      ],
+      "id": "5ebc0d05-1796-459a-b01d-71369764d65d",
+      "name": "Enviar texto",
+      "credentials": {
+        "evolutionApi": {
+          "id": "6aCgScDhYrgRt176",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('whatsaap2').item.json.body.instance }}",
+        "remoteJid": "=34624098412@s.whatsapp.net",
+        "messageText": "=⚠️ ALERTA CRÍTICA: El sistema de mantenimiento reporta una falla estructural o de enfriamiento. Por favor, acuda a la zona de hornos de inmediato.",
+        "options_message": {
+          "delay": 1200
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -3216,
+        736
+      ],
+      "id": "4e4ba5a2-c5d6-4f23-ac90-2a0eac08e1e0",
+      "name": "Enviar texto1",
+      "credentials": {
+        "evolutionApi": {
+          "id": "6aCgScDhYrgRt176",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('whatsaap2').item.json.body.instance }}",
+        "remoteJid": "=34624098526@s.whatsapp.net",
+        "messageText": "=⚠️ ALERTA CRÍTICA: El sistema de mantenimiento reporta una falla estructural o de enfriamiento. Por favor, acuda a la zona de hornos de inmediato.",
+        "options_message": {
+          "delay": 1200
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -3216,
+        592
+      ],
+      "id": "f3563a8d-c573-4f7a-879b-9c00d08541db",
+      "name": "Enviar texto4",
+      "credentials": {
+        "evolutionApi": {
+          "id": "6aCgScDhYrgRt176",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "={{ $('whatsaap2').item.json.body.instance }}",
+        "remoteJid": "=34624098092@s.whatsapp.net",
+        "messageText": "=⚠️ ALERTA CRÍTICA: El sistema de mantenimiento reporta una falla estructural o de enfriamiento. Por favor, acuda a la zona de hornos de inmediato.",
+        "options_message": {
+          "delay": 1200
+        }
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -3216,
+        448
+      ],
+      "id": "4f13f016-23db-487c-9cab-6ee88e688931",
+      "name": "Enviar texto5",
+      "credentials": {
+        "evolutionApi": {
+          "id": "6aCgScDhYrgRt176",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c69e222c-4d66-464c-aa10-6c240086b629",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "10b9951b-20f9-41ca-844a-354d66943d39",
+              "name": "instance",
+              "value": "={{ $json.body.instance }}",
+              "type": "string"
+            },
+            {
+              "id": "94a6d37c-16e4-443d-ab87-426fb08836b9",
+              "name": "number_correct",
+              "value": "={{ $('whatsaap2').item.json.body.data.key.remoteJid }}",
+              "type": "string"
+            },
+            {
+              "id": "3d3baba1-4aed-420f-a0c9-a1a284f809cd",
+              "name": "id_message",
+              "value": "={{ $json.body.data.key.id }}",
+              "type": "string"
+            },
+            {
+              "id": "4c483d3e-fa2f-4c92-b7a5-bf1373e66e7a",
+              "name": "name_contact",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "5153d2ad-a337-4f89-a619-7e3b44cc29aa",
+              "name": "message_text",
+              "value": "={{ $json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "bb65967d-5ea3-4b85-9d9b-f7e63a790633",
+              "name": "message_type",
+              "value": "={{ $json.body.data.messageType }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -6704,
+        1136
+      ],
+      "id": "48c0553b-f237-4378-9556-86f3cddb2c86",
+      "name": "data",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c69e222c-4d66-464c-aa10-6c240086b629",
+              "name": "event",
+              "value": "={{ $json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "10b9951b-20f9-41ca-844a-354d66943d39",
+              "name": "instance",
+              "value": "={{ $json.body.instance }}",
+              "type": "string"
+            },
+            {
+              "id": "94a6d37c-16e4-443d-ab87-426fb08836b9",
+              "name": "number_correct",
+              "value": "={{ $json.body.data.key.senderPn }}",
+              "type": "string"
+            },
+            {
+              "id": "3d3baba1-4aed-420f-a0c9-a1a284f809cd",
+              "name": "id_message",
+              "value": "={{ $json.body.data.key.id }}",
+              "type": "string"
+            },
+            {
+              "id": "4c483d3e-fa2f-4c92-b7a5-bf1373e66e7a",
+              "name": "name_contact",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "5153d2ad-a337-4f89-a619-7e3b44cc29aa",
+              "name": "message_text",
+              "value": "={{ $json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "bb65967d-5ea3-4b85-9d9b-f7e63a790633",
+              "name": "message_type",
+              "value": "={{ $json.body.data.messageType }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -6880,
+        1312
+      ],
+      "id": "04ec8305-d182-4390-aace-dadb15dd4c31",
+      "name": "data1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c69e222c-4d66-464c-aa10-6c240086b629",
+              "name": "event",
+              "value": "={{ $('whatsaap2').item.json.body.event }}",
+              "type": "string"
+            },
+            {
+              "id": "94a6d37c-16e4-443d-ab87-426fb08836b9",
+              "name": "number_sent",
+              "value": "={{ ($json.body.data?.key?.remoteJid || $json.body.data?.senderPn || $json.body.data?.sender || \"\").split('@')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "3d3baba1-4aed-420f-a0c9-a1a284f809cd",
+              "name": "id_message",
+              "value": "={{ $json.body.data.key.id }}",
+              "type": "string"
+            },
+            {
+              "id": "4c483d3e-fa2f-4c92-b7a5-bf1373e66e7a",
+              "name": "name_contact",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "5153d2ad-a337-4f89-a619-7e3b44cc29aa",
+              "name": "message_text",
+              "value": "={{ $json.body.data.message.conversation }}",
+              "type": "string"
+            },
+            {
+              "id": "bb65967d-5ea3-4b85-9d9b-f7e63a790633",
+              "name": "message_type",
+              "value": "={{ $json.body.data.messageType }}",
+              "type": "string"
+            },
+            {
+              "id": "9eb1e4e4-1fb6-46f7-a2d4-0af54cadb744",
+              "name": "instance",
+              "value": "={{ $json.body.instance}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -6544,
+        1344
+      ],
+      "id": "a5b3779c-a425-488c-9130-e34998b7bc0f",
+      "name": "data2"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('data2').item.json.number_sent }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -2672,
+        992
+      ],
+      "id": "6fd4e6f2-e0f8-437c-a66f-257a17b555a2",
+      "name": "Borrarmensaje",
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c69e222c-4d66-464c-aa10-6c240086b629",
+              "name": "event",
+              "value": "={{ $json.event }}",
+              "type": "string"
+            },
+            {
+              "id": "94a6d37c-16e4-443d-ab87-426fb08836b9",
+              "name": "number_sent",
+              "value": "={{ ($json.body.data?.key?.remoteJid || $json.body.data?.senderPn || $json.body.data?.sender || \"\").split('@')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "3d3baba1-4aed-420f-a0c9-a1a284f809cd",
+              "name": "id_message",
+              "value": "={{ $json.id_message }}",
+              "type": "string"
+            },
+            {
+              "id": "4c483d3e-fa2f-4c92-b7a5-bf1373e66e7a",
+              "name": "name_contact",
+              "value": "={{ $json.name_contact }}",
+              "type": "string"
+            },
+            {
+              "id": "5153d2ad-a337-4f89-a619-7e3b44cc29aa",
+              "name": "message_text",
+              "value": "={{ $json.message_text }}",
+              "type": "string"
+            },
+            {
+              "id": "bb65967d-5ea3-4b85-9d9b-f7e63a790633",
+              "name": "message_type",
+              "value": "={{ $json.message_type }}",
+              "type": "string"
+            },
+            {
+              "id": "9eb1e4e4-1fb6-46f7-a2d4-0af54cadb744",
+              "name": "instance",
+              "value": "={{ $json.instance}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -6576,
+        1584
+      ],
+      "id": "bebf00f0-05ba-4792-9848-3fb3955e5e6d",
+      "name": "data3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "081ddca0-56bd-4b6a-b02f-40ebd2b6cf2e",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "[TRIGGER_SUPERVISOR_ALERT]",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3488,
+        880
+      ],
+      "id": "ee6882b9-c413-4a70-8473-d45fe4e4acb2",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "64526abb-4526-4bf9-af2e-08354da66882",
+              "leftValue": "={{ $('whatsaap2').item.json.body.data.key.remoteJid }}",
+              "rightValue": "s.whatsapp.net",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -6976,
+        1152
+      ],
+      "id": "a34c7256-cb22-46a3-ba39-4e1e66b89641",
+      "name": "If6",
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respuesta Hora no disponible",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Cita no encontrada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delete an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Citas no encontradas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Bot Inicial",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Validar Agendar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Validar Cancelar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Validar Citas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respuesta Bot Defecto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Agregar cita en Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete an event": {
+      "main": [
+        [
+          {
+            "node": "Buscar cita agendada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Get many events1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Buscar citas de cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Respuesta de Cita Agendada1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar cita agendada": {
+      "main": [
+        [
+          {
+            "node": "Delete rows or columns from sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar citas de cliente": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agregar cita en Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Respuesta de Cita Agendada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete rows or columns from sheet": {
+      "main": [
+        [
+          {
+            "node": "Respuesta Cita Cancelada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Agendar": {
+      "main": [
+        [
+          {
+            "node": "¿Agendar válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Agendar válido?": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error formato agendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Cancelar": {
+      "main": [
+        [
+          {
+            "node": "¿Cancelar válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Cancelar válido?": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error formato cancelar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Citas": {
+      "main": [
+        [
+          {
+            "node": "¿Citas válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Citas válido?": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error formato citas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "whatsaap2": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter4": {
+      "main": [
+        [
+          {
+            "node": "If6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait6": {
+      "main": [
+        [
+          {
+            "node": "message_read2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "message_read2": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "texto2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "base_64_audio2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "base_64_images2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "base_64_documents2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze_image2": {
+      "main": [
+        [
+          {
+            "node": "images_data2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "images_data2": {
+      "main": [
+        [
+          {
+            "node": "input2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to image2": {
+      "main": [
+        [
+          {
+            "node": "Analyze_image2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "base_64_images2": {
+      "main": [
+        [
+          {
+            "node": "Convert to image2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "base_64_audio2": {
+      "main": [
+        [
+          {
+            "node": "Convert to mp4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to documents2": {
+      "main": [
+        [
+          {
+            "node": "Message a model2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "base_64_documents2": {
+      "main": [
+        [
+          {
+            "node": "Convert to documents2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to mp4": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording2": {
+      "main": [
+        [
+          {
+            "node": "audio2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "audio2": {
+      "main": [
+        [
+          {
+            "node": "input2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model2": {
+      "main": [
+        [
+          {
+            "node": "archivo2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "archivo2": {
+      "main": [
+        [
+          {
+            "node": "input2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "input2": {
+      "main": [
+        [
+          {
+            "node": "record message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait7": {
+      "main": [
+        [
+          {
+            "node": "Redis2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis2": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "record message2": {
+      "main": [
+        [
+          {
+            "node": "Wait7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser2",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "split output2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [
+          {
+            "node": "Aggregate2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "Enviarimagen2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar texto2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar texto2": {
+      "main": [
+        [
+          {
+            "node": "Wait8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait8": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate2": {
+      "main": [
+        [
+          {
+            "node": "Borrarmensaje2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "texto2": {
+      "main": [
+        [
+          {
+            "node": "input2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviarimagen2": {
+      "main": [
+        [
+          {
+            "node": "Wait8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Filter4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar texto3": {
+      "main": [
+        [
+          {
+            "node": "Borrarmensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "data": {
+      "main": [
+        [
+          {
+            "node": "data2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "data1": {
+      "main": [
+        [
+          {
+            "node": "data2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "data2": {
+      "main": [
+        [
+          {
+            "node": "Wait6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Enviar texto",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar texto1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar texto4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Enviar texto5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar texto3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If6": {
+      "main": [
+        [
+          {
+            "node": "data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "bf095ea3-1f7c-4ad0-b1ca-8489fc2d8f12",
+  "meta": {
+    "instanceId": "15f2e9153f1a13665051e6584d5fecc1dee02696839d12ffa48b27cae2825711"
+  },
+  "id": "2BprUqvLTAiJ5dfM",
+  "tags": []
+}
