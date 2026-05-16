@@ -456,7 +456,8 @@
             "Nombre Cliente": "={{ $('Procesar Confirmación').item.json.name }}",
             "Teléfono": "={{ $('data_citas').item.json.chatId }}",
             "Fecha y hora": "={{ DateTime.fromISO($('Procesar Confirmación').item.json.startDateTime).setLocale('es').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\") }}",
-            "Fecha ISO": "={{ $json.start.dateTime }}"
+            "Fecha ISO": "={{ $json.start.dateTime }}",
+            "Status": "1"
           },
           "schema": [
             {"id": "id", "type": "string", "display": true, "removed": false, "required": false, "displayName": "id", "defaultMatch": true, "canBeUsedToMatch": true},
@@ -464,7 +465,8 @@
             {"id": "Nombre Cliente", "type": "string", "display": true, "required": false, "displayName": "Nombre Cliente", "defaultMatch": false, "canBeUsedToMatch": true},
             {"id": "Teléfono", "type": "string", "display": true, "required": false, "displayName": "Teléfono", "defaultMatch": false, "canBeUsedToMatch": true},
             {"id": "Fecha y hora", "type": "string", "display": true, "required": false, "displayName": "Fecha y hora", "defaultMatch": false, "canBeUsedToMatch": true},
-            {"id": "Fecha ISO", "type": "string", "display": true, "required": false, "displayName": "Fecha ISO", "defaultMatch": false, "canBeUsedToMatch": true}
+            {"id": "Fecha ISO", "type": "string", "display": true, "required": false, "displayName": "Fecha ISO", "defaultMatch": false, "canBeUsedToMatch": true},
+            {"id": "Status", "type": "string", "display": true, "required": false, "displayName": "Status", "defaultMatch": false, "canBeUsedToMatch": true}
           ],
           "mappingMode": "defineBelow",
           "matchingColumns": ["id"]
@@ -862,7 +864,7 @@
     },
     {
       "parameters": {
-        "operation": "delete",
+        "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
           "value": "1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ",
@@ -877,7 +879,19 @@
           "cachedResultName": "Hoja 1",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit#gid=0"
         },
-        "startIndex": "={{ $json.row_number }}"
+        "columns": {
+          "value": {
+            "id": "={{ $('Procesar Cancel Data').item.json.eventId }}",
+            "Status": "2"
+          },
+          "schema": [
+            {"id": "id", "type": "string", "display": true, "removed": false, "required": false, "displayName": "id", "defaultMatch": true, "canBeUsedToMatch": true},
+            {"id": "Status", "type": "string", "display": true, "required": false, "displayName": "Status", "defaultMatch": false, "canBeUsedToMatch": true}
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": ["id"]
+        },
+        "options": {}
       },
       "id": "n9-051",
       "name": "Sheets: Eliminar Fila Cancel",
@@ -1151,7 +1165,10 @@
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit#gid=0"
         },
         "filtersUI": {
-          "values": [{"lookupColumn": "NIE", "lookupValue": "={{ $('Validar NIE (Cancelar)').item.json.nie }}"}]
+          "values": [
+            {"lookupColumn": "NIE", "lookupValue": "={{ $('Validar NIE (Cancelar)').item.json.nie }}"},
+            {"lookupColumn": "Status", "lookupValue": "1"}
+          ]
         },
         "options": {}
       },
@@ -1299,7 +1316,10 @@
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit#gid=0"
         },
         "filtersUI": {
-          "values": [{"lookupColumn": "NIE", "lookupValue": "={{ $('Validar NIE (Citas)').item.json.nie }}"}]
+          "values": [
+            {"lookupColumn": "NIE", "lookupValue": "={{ $('Validar NIE (Citas)').item.json.nie }}"},
+            {"lookupColumn": "Status", "lookupValue": "1"}
+          ]
         },
         "options": {}
       },
