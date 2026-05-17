@@ -11,7 +11,10 @@
       "name": "WA Cloud Verify (GET)",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [-1300, 912],
+      "position": [
+        -1300,
+        912
+      ],
       "webhookId": "wa-cloud-verify-v9"
     },
     {
@@ -24,75 +27,156 @@
       "name": "WA Cloud Trigger (POST)",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
-      "position": [-1300, 1200],
+      "position": [
+        -1300,
+        1200
+      ],
       "webhookId": "wa-cloud-trigger-v9"
     },
     {
       "parameters": {
         "conditions": {
-          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
           "conditions": [
-            {"id": "tc1", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $json.query['hub.mode'] }}", "rightValue": "subscribe"},
-            {"id": "tc2", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $json.query['hub.verify_token'] }}", "rightValue": "consultorio_secreto_2026"}
+            {
+              "id": "tc1",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.query['hub.mode'] }}",
+              "rightValue": "subscribe"
+            },
+            {
+              "id": "tc2",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.query['hub.verify_token'] }}",
+              "rightValue": "consultorio_secreto_2026"
+            }
           ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "n9-003",
-      "name": "¿Token correcto?",
+      "name": "Token correcto?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [-1100, 912]
+      "position": [
+        -1100,
+        912
+      ]
     },
     {
       "parameters": {
         "respondWith": "text",
         "responseBody": "={{ $('WA Cloud Verify (GET)').item.json.query['hub.challenge'] }}",
-        "options": {"responseCode": 200}
+        "options": {
+          "responseCode": 200
+        }
       },
       "id": "n9-004",
       "name": "Respond Challenge",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-900, 800]
+      "position": [
+        -900,
+        800
+      ]
     },
     {
       "parameters": {
         "respondWith": "text",
         "responseBody": "Forbidden",
-        "options": {"responseCode": 403}
+        "options": {
+          "responseCode": 403
+        }
       },
       "id": "n9-005",
       "name": "Respond 403",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [-900, 1008]
+      "position": [
+        -900,
+        1008
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 3},
-          "conditions": [{"id": "fv1", "operator": {"type": "string", "operation": "notEmpty", "singleValue": true}, "leftValue": "={{ $json.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.id }}", "rightValue": ""}],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fv1",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0]?.id }}",
+              "rightValue": ""
+            }
+          ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "n9-006",
-      "name": "Filtrar mensajes válidos",
+      "name": "Filtrar mensajes validos",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.3,
-      "position": [-1100, 1200]
+      "position": [
+        -1100,
+        1200
+      ]
     },
     {
       "parameters": {
         "assignments": {
           "assignments": [
-            {"id": "dc1", "name": "chatId", "value": "={{ $json.body.entry[0].changes[0].value.messages[0].from }}", "type": "string"},
-            {"id": "dc2", "name": "messageText", "value": "={{ ($json.body.entry[0].changes[0].value.messages[0].text?.body || $json.body.entry[0].changes[0].value.messages[0].interactive?.button_reply?.id || $json.body.entry[0].changes[0].value.messages[0].interactive?.list_reply?.id || $json.body.entry[0].changes[0].value.messages[0].button?.text || '').trim() }}", "type": "string"},
-            {"id": "dc3", "name": "pushName", "value": "={{ $json.body.entry[0].changes[0].value.contacts?.[0]?.profile?.name || 'Cliente' }}", "type": "string"},
-            {"id": "dc4", "name": "phoneNumberId", "value": "1126266787234598", "type": "string"},
-            {"id": "dc5", "name": "messageId", "value": "={{ $json.body.entry[0].changes[0].value.messages[0].id }}", "type": "string"}
+            {
+              "id": "dc1",
+              "name": "chatId",
+              "value": "={{ $json.body.entry[0].changes[0].value.messages[0].from }}",
+              "type": "string"
+            },
+            {
+              "id": "dc2",
+              "name": "messageText",
+              "value": "={{ ($json.body.entry[0].changes[0].value.messages[0].text?.body || $json.body.entry[0].changes[0].value.messages[0].interactive?.button_reply?.id || $json.body.entry[0].changes[0].value.messages[0].interactive?.list_reply?.id || $json.body.entry[0].changes[0].value.messages[0].button?.text || '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "dc3",
+              "name": "pushName",
+              "value": "={{ $json.body.entry[0].changes[0].value.contacts?.[0]?.profile?.name || 'Cliente' }}",
+              "type": "string"
+            },
+            {
+              "id": "dc4",
+              "name": "phoneNumberId",
+              "value": "1126266787234598",
+              "type": "string"
+            },
+            {
+              "id": "dc5",
+              "name": "messageId",
+              "value": "={{ $json.body.entry[0].changes[0].value.messages[0].id }}",
+              "type": "string"
+            }
           ]
         },
         "options": {}
@@ -101,7 +185,10 @@
       "name": "data_citas",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-900, 1200]
+      "position": [
+        -900,
+        1200
+      ]
     },
     {
       "parameters": {
@@ -113,8 +200,16 @@
       "name": "Redis: Get State",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-700, 1200],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        -700,
+        1200
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
@@ -122,129 +217,354 @@
           "values": [
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "or",
                 "conditions": [
-                  {"id": "sw1a", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "/start"},
-                  {"id": "sw1b", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}", "rightValue": "hola"},
-                  {"id": "sw1c", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}", "rightValue": "menu"},
-                  {"id": "sw1d", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}", "rightValue": "menú"},
-                  {"id": "sw1e", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "btn_otro_si"}
+                  {
+                    "id": "sw1a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "/start"
+                  },
+                  {
+                    "id": "sw1b",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}",
+                    "rightValue": "hola"
+                  },
+                  {
+                    "id": "sw1c",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}",
+                    "rightValue": "menu"
+                  },
+                  {
+                    "id": "sw1d",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}",
+                    "rightValue": "menú"
+                  },
+                  {
+                    "id": "sw1e",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "btn_otro_si"
+                  }
                 ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
                 "conditions": [
-                  {"id": "sw2a", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "btn_agendar"}
+                  {
+                    "id": "sw2a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "btn_agendar"
+                  }
                 ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
                 "conditions": [
-                  {"id": "sw3a", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "btn_cancelar"}
+                  {
+                    "id": "sw3a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "btn_cancelar"
+                  }
                 ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
                 "conditions": [
-                  {"id": "sw4a", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "btn_citas"}
+                  {
+                    "id": "sw4a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "btn_citas"
+                  }
                 ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "or",
                 "conditions": [
-                  {"id": "sw5a", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "btn_confirm_yes"},
-                  {"id": "sw5b", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}", "rightValue": "sí"},
-                  {"id": "sw5c", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}", "rightValue": "si"},
-                  {"id": "sw5d", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}", "rightValue": "confirmo"}
+                  {
+                    "id": "sw5a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "btn_confirm_yes"
+                  },
+                  {
+                    "id": "sw5b",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}",
+                    "rightValue": "sí"
+                  },
+                  {
+                    "id": "sw5c",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}",
+                    "rightValue": "si"
+                  },
+                  {
+                    "id": "sw5d",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}",
+                    "rightValue": "confirmo"
+                  }
                 ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "or",
                 "conditions": [
-                  {"id": "sw6a", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "btn_confirm_no"},
-                  {"id": "sw6b", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}", "rightValue": "no"}
+                  {
+                    "id": "sw6a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "btn_confirm_no"
+                  },
+                  {
+                    "id": "sw6b",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}",
+                    "rightValue": "no"
+                  }
                 ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
                 "conditions": [
-                  {"id": "sw7a", "operator": {"type": "string", "operation": "startsWith"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "slot_"}
+                  {
+                    "id": "sw7a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "slot_"
+                  }
                 ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
                 "conditions": [
-                  {"id": "sw8a", "operator": {"type": "string", "operation": "startsWith"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "date_"}
+                  {
+                    "id": "sw8a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "date_"
+                  }
                 ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
                 "conditions": [
-                  {"id": "sw9a", "operator": {"type": "string", "operation": "startsWith"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "cancel_"}
+                  {
+                    "id": "sw9a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "startsWith"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "cancel_"
+                  }
                 ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
                 "conditions": [
-                  {"id": "sw10a", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "confirm_cancel_yes"}
+                  {
+                    "id": "sw10a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "confirm_cancel_yes"
+                  }
                 ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
                 "conditions": [
-                  {"id": "sw11a", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "confirm_cancel_no"}
+                  {
+                    "id": "sw11a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "confirm_cancel_no"
+                  }
                 ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
                 "conditions": [
-                  {"id": "sw12a", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ $('data_citas').item.json.messageText }}", "rightValue": "btn_otro_no"}
+                  {
+                    "id": "sw12a",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $('data_citas').item.json.messageText }}",
+                    "rightValue": "btn_otro_no"
+                  }
                 ]
               }
             }
           ]
         },
-        "options": {"fallbackOutput": "extra"}
+        "options": {
+          "fallbackOutput": "extra"
+        }
       },
       "id": "n9-009",
       "name": "Switch Comando",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
-      "position": [-500, 1200]
+      "position": [
+        -500,
+        1200
+      ]
     },
     {
       "parameters": {
@@ -255,8 +575,16 @@
       "name": "Redis: Del State Menu",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-300, 200],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        -300,
+        200
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
@@ -266,7 +594,10 @@
       "name": "Preparar Bienvenida",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-100, 200]
+      "position": [
+        -100,
+        200
+      ]
     },
     {
       "parameters": {
@@ -284,81 +615,185 @@
       "name": "Msg: Menu",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [100, 200],
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "position": [
+        100,
+        200
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
         "operation": "set",
         "key": "={{ 'state:' + $('data_citas').item.json.chatId }}",
-        "value": "{\"step\":\"ask_nie_agendar\"}",
-        "additionalFields": {"expire": true, "ttl": 900}
+        "value": "={{ JSON.stringify({ step: 'ask_nie_agendar', ts: Date.now() }) }}",
+        "additionalFields": {
+          "expire": true,
+          "ttl": 900
+        }
       },
       "id": "n9-013",
       "name": "Redis: Set State Agendar",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-300, 600],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        -300,
+        600
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
         "operation": "set",
         "key": "={{ 'state:' + $('data_citas').item.json.chatId }}",
-        "value": "{\"step\":\"ask_nie_cancelar\"}",
-        "additionalFields": {"expire": true, "ttl": 900}
+        "value": "={{ JSON.stringify({ step: 'ask_nie_cancelar', ts: Date.now() }) }}",
+        "additionalFields": {
+          "expire": true,
+          "ttl": 900
+        }
       },
       "id": "n9-014",
       "name": "Redis: Set State Cancelar",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-300, 750],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        -300,
+        750
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
         "operation": "set",
         "key": "={{ 'state:' + $('data_citas').item.json.chatId }}",
-        "value": "{\"step\":\"ask_nie_citas\"}",
-        "additionalFields": {"expire": true, "ttl": 900}
+        "value": "={{ JSON.stringify({ step: 'ask_nie_citas', ts: Date.now() }) }}",
+        "additionalFields": {
+          "expire": true,
+          "ttl": 900
+        }
       },
       "id": "n9-015",
       "name": "Redis: Set State Citas",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-300, 900],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        -300,
+        900
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
         "operation": "send",
         "phoneNumberId": "={{ $('data_citas').item.json.phoneNumberId }}",
         "recipientPhoneNumber": "={{ $('data_citas').item.json.chatId }}",
-        "textBody": "=Por favor escribe tu *NIE* (Numero de Identidad de Extranjero).\n\nFormato: *X1234567L*\n_(letra X, Y o Z + 7 digitos + letra control)_",
+        "textBody": "=Para *agendar tu cita*, por favor escribe tu *NIE* (Numero de Identidad de Extranjero).\n\nFormato: *X1234567L*\n_(letra X, Y o Z + 7 digitos + letra control)_",
         "additionalFields": {}
       },
       "id": "n9-016",
-      "name": "Msg: Pedir NIE",
+      "name": "Msg: Pedir NIE Agendar",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [-100, 750],
-      "webhookId": "n9-pedir-nie-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "position": [
+        -100,
+        700
+      ],
+      "webhookId": "n9-pedir-nie-agendar-v9",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nconst zone = 'America/Guayaquil';\nconst startDT = DateTime.fromFormat(`${state.date} ${state.time}`, 'yyyy-MM-dd HH:mm', { zone });\nif (!startDT.isValid) {\n  return { valid: false, error: 'Estado inválido. Escribe /start para comenzar.' };\n}\nconst endDT = startDT.plus({ hours: 1 });\nreturn {\n  valid: true,\n  nie: state.nie || '',\n  name: state.name || $('data_citas').item.json.pushName || 'Cliente',\n  date: state.date,\n  time: state.time,\n  startDateTime: startDT.toISO(),\n  endDateTime: endDT.toISO()\n};"
+        "operation": "send",
+        "phoneNumberId": "={{ $('data_citas').item.json.phoneNumberId }}",
+        "recipientPhoneNumber": "={{ $('data_citas').item.json.chatId }}",
+        "textBody": "=Para *cancelar tu cita*, por favor escribe tu *NIE* (Numero de Identidad de Extranjero).\n\nFormato: *X1234567L*\n_(letra X, Y o Z + 7 digitos + letra control)_",
+        "additionalFields": {}
+      },
+      "id": "n9-103",
+      "name": "Msg: Pedir NIE Cancelar",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        800
+      ],
+      "webhookId": "n9-pedir-nie-cancelar-v9",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "={{ $('data_citas').item.json.phoneNumberId }}",
+        "recipientPhoneNumber": "={{ $('data_citas').item.json.chatId }}",
+        "textBody": "=Para *consultar tus citas*, por favor escribe tu *NIE* (Numero de Identidad de Extranjero).\n\nFormato: *X1234567L*\n_(letra X, Y o Z + 7 digitos + letra control)_",
+        "additionalFields": {}
+      },
+      "id": "n9-104",
+      "name": "Msg: Pedir NIE Citas",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        900
+      ],
+      "webhookId": "n9-pedir-nie-citas-v9",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nconst zone = 'America/Guayaquil';\nconst startDT = DateTime.fromFormat(`${state.date} ${state.time}`, 'yyyy-MM-dd HH:mm', { zone });\nif (!startDT.isValid) {\n  return { valid: false, error: 'Estado inv\\u00e1lido. Escribe /start para comenzar.' };\n}\nconst endDT = startDT.plus({ hours: 1 });\nreturn {\n  valid: true,\n  nie: state.nie || '',\n  name: state.name || $('data_citas').item.json.pushName || 'Cliente',\n  date: state.date,\n  time: state.time,\n  startDateTime: startDT.toISO(),\n  endDateTime: endDT.toISO()\n};"
       },
       "id": "n9-017",
-      "name": "Procesar Confirmación",
+      "name": "Procesar Confirmacion",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-300, 1100]
+      "position": [
+        -300,
+        1100
+      ]
     },
     {
       "parameters": {
         "operation": "getAll",
-        "calendar": {"__rl": true, "value": "fespinoza@frecdigital.com", "mode": "id"},
+        "calendar": {
+          "__rl": true,
+          "value": "fespinoza@frecdigital.com",
+          "mode": "id"
+        },
         "returnAll": true,
         "timeMin": "={{ $json.startDateTime }}",
         "timeMax": "={{ $json.endDateTime }}",
@@ -368,9 +803,17 @@
       "name": "GCal: Verificar Slot",
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
-      "position": [-100, 1100],
+      "position": [
+        -100,
+        1100
+      ],
       "alwaysOutputData": true,
-      "credentials": {"googleCalendarOAuth2Api": {"id": "G51TsY82QIvuYAdH", "name": "Google Calendar account"}}
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "G51TsY82QIvuYAdH",
+          "name": "Google Calendar account"
+        }
+      }
     },
     {
       "parameters": {
@@ -380,22 +823,44 @@
       "name": "Verificar Disponibilidad",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [100, 1100]
+      "position": [
+        100,
+        1100
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
-          "conditions": [{"id": "sl1", "operator": {"type": "boolean", "operation": "true", "singleValue": true}, "leftValue": "={{ $json.libre }}", "rightValue": ""}],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "sl1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.libre }}",
+              "rightValue": ""
+            }
+          ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "n9-020",
-      "name": "¿Slot Libre?",
+      "name": "Slot Libre?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [300, 1100]
+      "position": [
+        300,
+        1100
+      ]
     },
     {
       "parameters": {
@@ -409,28 +874,55 @@
       "name": "Msg: Slot Ocupado",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [500, 950],
+      "position": [
+        500,
+        950
+      ],
       "webhookId": "n9-slot-ocupado-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
-        "calendar": {"__rl": true, "value": "fespinoza@frecdigital.com", "mode": "id"},
-        "start": "={{ $('Procesar Confirmación').item.json.startDateTime }}",
-        "end": "={{ $('Procesar Confirmación').item.json.endDateTime }}",
+        "calendar": {
+          "__rl": true,
+          "value": "fespinoza@frecdigital.com",
+          "mode": "id"
+        },
+        "start": "={{ $('Procesar Confirmacion').item.json.startDateTime }}",
+        "end": "={{ $('Procesar Confirmacion').item.json.endDateTime }}",
         "useDefaultReminders": false,
         "additionalFields": {
-          "description": "={{ 'NIE: ' + $('Procesar Confirmación').item.json.nie + ' | Teléfono: ' + $('data_citas').item.json.chatId + ' | Agendada por WhatsApp Bot' }}",
-          "summary": "={{ 'Cita: ' + $('Procesar Confirmación').item.json.name }}"
+          "description": "={{ 'NIE: ' + $('Procesar Confirmacion').item.json.nie + ' | Telefono: ' + $('data_citas').item.json.chatId + ' | Agendada por WhatsApp Bot' }}",
+          "summary": "={{ 'Cita: ' + $('Procesar Confirmacion').item.json.name }}"
         },
-        "remindersUi": {"remindersValues": [{"method": "popup", "minutes": 30}]}
+        "remindersUi": {
+          "remindersValues": [
+            {
+              "method": "popup",
+              "minutes": 30
+            }
+          ]
+        }
       },
       "id": "n9-022",
       "name": "GCal: Crear Evento",
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
-      "position": [500, 1100],
-      "credentials": {"googleCalendarOAuth2Api": {"id": "G51TsY82QIvuYAdH", "name": "Google Calendar account"}}
+      "position": [
+        500,
+        1100
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "G51TsY82QIvuYAdH",
+          "name": "Google Calendar account"
+        }
+      }
     },
     {
       "parameters": {
@@ -446,30 +938,89 @@
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
-          "cachedResultName": "Hoja 1",
+          "cachedResultName": "citas",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit#gid=0"
         },
         "columns": {
           "value": {
             "id": "={{ $json.id }}",
-            "NIE": "={{ $('Procesar Confirmación').item.json.nie }}",
-            "Nombre Cliente": "={{ $('Procesar Confirmación').item.json.name }}",
-            "Teléfono": "={{ $('data_citas').item.json.chatId }}",
-            "Fecha y hora": "={{ DateTime.fromISO($('Procesar Confirmación').item.json.startDateTime).setLocale('es').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\") }}",
+            "NIE": "={{ $('Procesar Confirmacion').item.json.nie }}",
+            "Nombre Cliente": "={{ $('Procesar Confirmacion').item.json.name }}",
+            "Telefono": "={{ $('data_citas').item.json.chatId }}",
+            "Fecha y hora": "={{ DateTime.fromISO($('Procesar Confirmacion').item.json.startDateTime).setLocale('es').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\") }}",
             "Fecha ISO": "={{ $json.start.dateTime }}",
             "Status": "1"
           },
           "schema": [
-            {"id": "id", "type": "string", "display": true, "removed": false, "required": false, "displayName": "id", "defaultMatch": true, "canBeUsedToMatch": true},
-            {"id": "NIE", "type": "string", "display": true, "required": false, "displayName": "NIE", "defaultMatch": false, "canBeUsedToMatch": true},
-            {"id": "Nombre Cliente", "type": "string", "display": true, "required": false, "displayName": "Nombre Cliente", "defaultMatch": false, "canBeUsedToMatch": true},
-            {"id": "Teléfono", "type": "string", "display": true, "required": false, "displayName": "Teléfono", "defaultMatch": false, "canBeUsedToMatch": true},
-            {"id": "Fecha y hora", "type": "string", "display": true, "required": false, "displayName": "Fecha y hora", "defaultMatch": false, "canBeUsedToMatch": true},
-            {"id": "Fecha ISO", "type": "string", "display": true, "required": false, "displayName": "Fecha ISO", "defaultMatch": false, "canBeUsedToMatch": true},
-            {"id": "Status", "type": "string", "display": true, "required": false, "displayName": "Status", "defaultMatch": false, "canBeUsedToMatch": true}
+            {
+              "id": "id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "id",
+              "defaultMatch": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "NIE",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "NIE",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre Cliente",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Nombre Cliente",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Telefono",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Telefono",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha y hora",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Fecha y hora",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha ISO",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Fecha ISO",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Status",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
           ],
           "mappingMode": "defineBelow",
-          "matchingColumns": ["id"]
+          "matchingColumns": [
+            "id"
+          ]
         },
         "options": {}
       },
@@ -477,8 +1028,16 @@
       "name": "Sheets: Guardar Cita",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [700, 1100],
-      "credentials": {"googleSheetsOAuth2Api": {"id": "v7s9GIw4NGmJaHUm", "name": "Google Sheets account"}}
+      "position": [
+        700,
+        1100
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v7s9GIw4NGmJaHUm",
+          "name": "Google Sheets account"
+        }
+      }
     },
     {
       "parameters": {
@@ -489,24 +1048,40 @@
       "name": "Redis: Del State Confirm",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [900, 1100],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        900,
+        1100
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
         "operation": "send",
         "phoneNumberId": "={{ $('data_citas').item.json.phoneNumberId }}",
         "recipientPhoneNumber": "={{ $('data_citas').item.json.chatId }}",
-        "textBody": "=*Cita confirmada exitosamente!*\n\n*Paciente:* {{ $('Procesar Confirmación').item.json.name }}\n*NIE:* {{ $('Procesar Confirmación').item.json.nie }}\n*Fecha:* {{ DateTime.fromISO($('Procesar Confirmación').item.json.startDateTime).setLocale('es').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\") }}\n\nRecibiras un recordatorio 30 minutos antes. Te esperamos!",
+        "textBody": "=*Cita confirmada exitosamente!*\n\n*Paciente:* {{ $('Procesar Confirmacion').item.json.name }}\n*NIE:* {{ $('Procesar Confirmacion').item.json.nie }}\n*Fecha:* {{ DateTime.fromISO($('Procesar Confirmacion').item.json.startDateTime).setLocale('es').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\") }}\n\nRecibiras un recordatorio 30 minutos antes. Te esperamos!",
         "additionalFields": {}
       },
       "id": "n9-025",
       "name": "Msg: Cita Confirmada",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [1100, 1100],
+      "position": [
+        1100,
+        1100
+      ],
       "webhookId": "n9-cita-confirmada-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
@@ -517,8 +1092,16 @@
       "name": "Redis: Del State No",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-300, 1400],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        -300,
+        1400
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
@@ -532,43 +1115,68 @@
       "name": "Msg: No Confirmada",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [-100, 1400],
+      "position": [
+        -100,
+        1400
+      ],
       "webhookId": "n9-no-confirmada-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const txt = $('data_citas').item.json.messageText;\nconst m = txt.match(/^slot_(\\d{4}-\\d{2}-\\d{2})_(\\d{2})(\\d{2})$/);\nif (!m) return { valid: false, error: 'Formato de slot inválido' };\nconst date = m[1];\nconst time = `${m[2]}:${m[3]}`;\nconst raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nconst nie = state.nie || '';\nconst name = state.name || $('data_citas').item.json.pushName || 'Cliente';\nconst zone = 'America/Guayaquil';\nconst startDT = DateTime.fromFormat(`${date} ${time}`, 'yyyy-MM-dd HH:mm', { zone });\nconst endDT = startDT.plus({ hours: 1 });\nconst dateFormatted = startDT.setLocale('es').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\");\nreturn { valid: true, date, time, nie, name, startDateTime: startDT.toISO(), endDateTime: endDT.toISO(), dateFormatted };"
+        "jsCode": "const txt = $('data_citas').item.json.messageText;\nconst m = txt.match(/^slot_(\\d{4}-\\d{2}-\\d{2})_(\\d{2})(\\d{2})$/);\nif (!m) return { valid: false, error: 'Formato de slot inv\\u00e1lido' };\nconst date = m[1];\nconst time = `${m[2]}:${m[3]}`;\nconst raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nconst nie = state.nie || '';\nconst name = state.name || $('data_citas').item.json.pushName || 'Cliente';\nconst zone = 'America/Guayaquil';\nconst startDT = DateTime.fromFormat(`${date} ${time}`, 'yyyy-MM-dd HH:mm', { zone });\nconst endDT = startDT.plus({ hours: 1 });\nconst dateFormatted = startDT.setLocale('es').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\");\nreturn { valid: true, date, time, nie, name, startDateTime: startDT.toISO(), endDateTime: endDT.toISO(), dateFormatted };"
       },
       "id": "n9-028",
       "name": "Procesar Slot",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-300, 1700]
+      "position": [
+        -300,
+        1700
+      ]
     },
     {
       "parameters": {
         "operation": "set",
         "key": "={{ 'state:' + $('data_citas').item.json.chatId }}",
-        "value": "={{ JSON.stringify({ step: 'confirmar', nie: $json.nie, name: $json.name, date: $json.date, time: $json.time, startDateTime: $json.startDateTime, endDateTime: $json.endDateTime }) }}",
-        "additionalFields": {"expire": true, "ttl": 900}
+        "value": "={{ JSON.stringify({ step: 'confirmar', nie: $json.nie, name: $json.name, date: $json.date, time: $json.time, startDateTime: $json.startDateTime, endDateTime: $json.endDateTime, ts: Date.now() }) }}",
+        "additionalFields": {
+          "expire": true,
+          "ttl": 900
+        }
       },
       "id": "n9-029",
       "name": "Redis: Set State Confirmar",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-100, 1700],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        -100,
+        1700
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const d = $('Procesar Slot').item.json;\nconst body = {\n  messaging_product: 'whatsapp',\n  recipient_type: 'individual',\n  to: $('data_citas').item.json.chatId,\n  type: 'interactive',\n  interactive: {\n    type: 'button',\n    header: { type: 'text', text: '\\uD83D\\uDCCB Confirma tu cita' },\n    body: { text: `\\uD83D\\uDC64 *${d.name}*\\n\\uD83C\\uDD94 NIE: *${d.nie}*\\n\\uD83D\\uDCC5 *${d.dateFormatted}*\\n\\n\\u00bfDeseas confirmar este horario?` },\n    footer: { text: 'Tu cita quedará reservada al confirmar' },\n    action: {\n      buttons: [\n        { type: 'reply', reply: { id: 'btn_confirm_yes', title: '\\u2705 Sí, confirmar' } },\n        { type: 'reply', reply: { id: 'btn_confirm_no', title: '\\u274C No, cancelar' } }\n      ]\n    }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
+        "jsCode": "const d = $('Procesar Slot').item.json;\nconst body = {\n  messaging_product: 'whatsapp',\n  recipient_type: 'individual',\n  to: $('data_citas').item.json.chatId,\n  type: 'interactive',\n  interactive: {\n    type: 'button',\n    header: { type: 'text', text: '\\uD83D\\uDCCB Confirma tu cita' },\n    body: { text: `\\uD83D\\uDC64 *${d.name}*\\n\\uD83C\\uDD94 NIE: *${d.nie}*\\n\\uD83D\\uDCC5 *${d.dateFormatted}*\\n\\n\\u00bfDeseas confirmar este horario?` },\n    footer: { text: 'Tu cita quedar\\u00e1 reservada al confirmar' },\n    action: {\n      buttons: [\n        { type: 'reply', reply: { id: 'btn_confirm_yes', title: '\\u2705 S\\u00ed, confirmar' } },\n        { type: 'reply', reply: { id: 'btn_confirm_no', title: '\\u274C No, cancelar' } }\n      ]\n    }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
       },
       "id": "n9-030",
       "name": "Preparar Botones Confirmar",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [100, 1700]
+      "position": [
+        100,
+        1700
+      ]
     },
     {
       "parameters": {
@@ -586,47 +1194,88 @@
       "name": "Msg: Confirmar Cita",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [300, 1700],
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "position": [
+        300,
+        1700
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const msg = $('data_citas').item.json.messageText;\nconst raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nconst nie = state.nie || '';\nconst name = state.name || $('data_citas').item.json.pushName || 'Cliente';\nif (msg === 'date_manual') {\n  return { isManual: true, nie, name };\n}\nconst dateMatch = msg.match(/^date_(\\d{4}-\\d{2}-\\d{2})$/);\nif (!dateMatch) {\n  return { isManual: false, valid: false, error: 'Fecha inválida', nie, name, date: null };\n}\nreturn { isManual: false, valid: true, date: dateMatch[1], nie, name };"
+        "jsCode": "const msg = $('data_citas').item.json.messageText;\nconst raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nconst nie = state.nie || '';\nconst name = state.name || $('data_citas').item.json.pushName || 'Cliente';\nif (msg === 'date_manual') {\n  return { isManual: true, nie, name };\n}\nconst dateMatch = msg.match(/^date_(\\d{4}-\\d{2}-\\d{2})$/);\nif (!dateMatch) {\n  return { isManual: false, valid: false, error: 'Fecha inv\\u00e1lida', nie, name, date: null };\n}\nreturn { isManual: false, valid: true, date: dateMatch[1], nie, name };"
       },
       "id": "n9-032",
       "name": "Procesar Fecha Seleccionada",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-300, 2000]
+      "position": [
+        -300,
+        2000
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
-          "conditions": [{"id": "fm1", "operator": {"type": "boolean", "operation": "true", "singleValue": true}, "leftValue": "={{ $json.isManual }}", "rightValue": ""}],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fm1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.isManual }}",
+              "rightValue": ""
+            }
+          ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "n9-033",
-      "name": "¿Fecha Manual?",
+      "name": "Fecha Manual?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [-100, 2000]
+      "position": [
+        -100,
+        2000
+      ]
     },
     {
       "parameters": {
         "operation": "set",
         "key": "={{ 'state:' + $('data_citas').item.json.chatId }}",
-        "value": "={{ JSON.stringify({ step: 'ask_date_manual', nie: $('Procesar Fecha Seleccionada').item.json.nie, name: $('Procesar Fecha Seleccionada').item.json.name }) }}",
-        "additionalFields": {"expire": true, "ttl": 900}
+        "value": "={{ JSON.stringify({ step: 'ask_date_manual', nie: $('Procesar Fecha Seleccionada').item.json.nie, name: $('Procesar Fecha Seleccionada').item.json.name, ts: Date.now() }) }}",
+        "additionalFields": {
+          "expire": true,
+          "ttl": 900
+        }
       },
       "id": "n9-034",
       "name": "Redis: Set State Fecha Manual",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [100, 1850],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        100,
+        1850
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
@@ -640,26 +1289,46 @@
       "name": "Msg: Pedir Fecha Manual",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [300, 1850],
+      "position": [
+        300,
+        1850
+      ],
       "webhookId": "n9-pedir-fecha-manual-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
         "operation": "getAll",
-        "calendar": {"__rl": true, "value": "fespinoza@frecdigital.com", "mode": "id"},
+        "calendar": {
+          "__rl": true,
+          "value": "fespinoza@frecdigital.com",
+          "mode": "id"
+        },
         "returnAll": true,
         "timeMin": "={{ (() => { let d; try { d = $('Procesar Fecha Seleccionada').item.json.date; } catch(e) { d = $('Procesar Fecha Manual').item.json.date; } return DateTime.fromISO(d, { zone: 'America/Guayaquil' }).startOf('day').toISO(); })() }}",
         "timeMax": "={{ (() => { let d; try { d = $('Procesar Fecha Seleccionada').item.json.date; } catch(e) { d = $('Procesar Fecha Manual').item.json.date; } return DateTime.fromISO(d, { zone: 'America/Guayaquil' }).endOf('day').toISO(); })() }}",
         "options": {}
       },
       "id": "n9-036",
-      "name": "GCal: Eventos del día",
+      "name": "GCal: Eventos del dia",
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
-      "position": [100, 2050],
+      "position": [
+        100,
+        2050
+      ],
       "alwaysOutputData": true,
-      "credentials": {"googleCalendarOAuth2Api": {"id": "G51TsY82QIvuYAdH", "name": "Google Calendar account"}}
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "G51TsY82QIvuYAdH",
+          "name": "Google Calendar account"
+        }
+      }
     },
     {
       "parameters": {
@@ -669,22 +1338,44 @@
       "name": "Calcular Slots",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [300, 2050]
+      "position": [
+        300,
+        2050
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
-          "conditions": [{"id": "hs1", "operator": {"type": "boolean", "operation": "true", "singleValue": true}, "leftValue": "={{ $json.hasSlots }}", "rightValue": ""}],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "hs1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.hasSlots }}",
+              "rightValue": ""
+            }
+          ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "n9-038",
-      "name": "¿Hay Slots?",
+      "name": "Hay Slots?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [500, 2050]
+      "position": [
+        500,
+        2050
+      ]
     },
     {
       "parameters": {
@@ -698,9 +1389,17 @@
       "name": "Msg: Sin Slots",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [700, 1900],
+      "position": [
+        700,
+        1900
+      ],
       "webhookId": "n9-sin-slots-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
@@ -710,7 +1409,10 @@
       "name": "Preparar Lista Horarios",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [700, 2050]
+      "position": [
+        700,
+        2050
+      ]
     },
     {
       "parameters": {
@@ -728,8 +1430,16 @@
       "name": "Msg: Seleccionar Hora",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [900, 2050],
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "position": [
+        900,
+        2050
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
@@ -741,42 +1451,67 @@
       "name": "Redis: Get Cancel List",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-300, 2350],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        -300,
+        2350
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const msg = $('data_citas').item.json.messageText;\nconst m = msg.match(/^cancel_(\\d+)$/);\nif (!m) return { valid: false, error: 'Selección inválida' };\nconst idx = parseInt(m[1]);\nconst raw = $('Redis: Get Cancel List').item.json.propertyName;\nlet listItems = [];\ntry { listItems = JSON.parse(raw || '[]'); } catch(e) {}\nconst item = listItems[idx];\nif (!item) return { valid: false, error: 'Cita no encontrada en la lista' };\nreturn { valid: true, idx, eventId: item.eventId, fecha: item.fecha, fechaISO: item.fechaISO, nie: item.nie, nombre: item.description };"
+        "jsCode": "const msg = $('data_citas').item.json.messageText;\nconst m = msg.match(/^cancel_(\\d+)$/);\nif (!m) return { valid: false, error: 'Selecci\\u00f3n inv\\u00e1lida' };\nconst idx = parseInt(m[1]);\nconst raw = $('Redis: Get Cancel List').item.json.propertyName;\nlet listItems = [];\ntry { listItems = JSON.parse(raw || '[]'); } catch(e) {}\nconst item = listItems[idx];\nif (!item) return { valid: false, error: 'Cita no encontrada en la lista' };\nreturn { valid: true, idx, eventId: item.eventId, fecha: item.fecha, fechaISO: item.fechaISO, nie: item.nie, nombre: item.description };"
       },
       "id": "n9-043",
-      "name": "Procesar Selección Cancel",
+      "name": "Procesar Seleccion Cancel",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-100, 2350]
+      "position": [
+        -100,
+        2350
+      ]
     },
     {
       "parameters": {
         "operation": "set",
         "key": "={{ 'cancel_pending:' + $('data_citas').item.json.chatId }}",
         "value": "={{ JSON.stringify({ eventId: $json.eventId, fecha: $json.fecha, nie: $json.nie, nombre: $json.nombre }) }}",
-        "additionalFields": {"expire": true, "ttl": 900}
+        "additionalFields": {
+          "expire": true,
+          "ttl": 900
+        }
       },
       "id": "n9-044",
       "name": "Redis: Set Cancel Pending",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [100, 2350],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        100,
+        2350
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const d = $('Procesar Selección Cancel').item.json;\nconst body = {\n  messaging_product: 'whatsapp',\n  recipient_type: 'individual',\n  to: $('data_citas').item.json.chatId,\n  type: 'interactive',\n  interactive: {\n    type: 'button',\n    header: { type: 'text', text: '\\u26a0\\ufe0f Confirmar cancelación' },\n    body: { text: `\\u00bfSeguro que deseas cancelar esta cita?\\n\\n\\uD83D\\uDCC5 *${d.fecha}*\\n\\nEsta acción no se puede deshacer.` },\n    footer: { text: 'Cancelación de cita' },\n    action: {\n      buttons: [\n        { type: 'reply', reply: { id: 'confirm_cancel_yes', title: '\\u2705 Sí, cancelar' } },\n        { type: 'reply', reply: { id: 'confirm_cancel_no', title: '\\u274C No, mantener' } }\n      ]\n    }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
+        "jsCode": "const d = $('Procesar Seleccion Cancel').item.json;\nconst body = {\n  messaging_product: 'whatsapp',\n  recipient_type: 'individual',\n  to: $('data_citas').item.json.chatId,\n  type: 'interactive',\n  interactive: {\n    type: 'button',\n    header: { type: 'text', text: '\\u26a0\\ufe0f Confirmar cancelaci\\u00f3n' },\n    body: { text: `\\u00bfSeguro que deseas cancelar esta cita?\\n\\n\\uD83D\\uDCC5 *${d.fecha}*\\n\\nEsta acci\\u00f3n no se puede deshacer.` },\n    footer: { text: 'Cancelaci\\u00f3n de cita' },\n    action: {\n      buttons: [\n        { type: 'reply', reply: { id: 'confirm_cancel_yes', title: '\\u2705 S\\u00ed, cancelar' } },\n        { type: 'reply', reply: { id: 'confirm_cancel_no', title: '\\u274C No, mantener' } }\n      ]\n    }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
       },
       "id": "n9-045",
       "name": "Preparar Botones Cancel",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [300, 2350]
+      "position": [
+        300,
+        2350
+      ]
     },
     {
       "parameters": {
@@ -794,8 +1529,16 @@
       "name": "Msg: Confirmar Cancelar",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [500, 2350],
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "position": [
+        500,
+        2350
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
@@ -807,8 +1550,16 @@
       "name": "Redis: Get Cancel Pending",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-300, 2650],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        -300,
+        2650
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
@@ -818,20 +1569,35 @@
       "name": "Procesar Cancel Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-100, 2650]
+      "position": [
+        -100,
+        2650
+      ]
     },
     {
       "parameters": {
         "operation": "delete",
-        "calendar": {"__rl": true, "value": "fespinoza@frecdigital.com", "mode": "id"},
+        "calendar": {
+          "__rl": true,
+          "value": "fespinoza@frecdigital.com",
+          "mode": "id"
+        },
         "eventId": "={{ $json.eventId }}"
       },
       "id": "n9-049",
       "name": "GCal: Eliminar Evento",
       "type": "n8n-nodes-base.googleCalendar",
       "typeVersion": 1.3,
-      "position": [100, 2650],
-      "credentials": {"googleCalendarOAuth2Api": {"id": "G51TsY82QIvuYAdH", "name": "Google Calendar account"}}
+      "position": [
+        100,
+        2650
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "G51TsY82QIvuYAdH",
+          "name": "Google Calendar account"
+        }
+      }
     },
     {
       "parameters": {
@@ -846,11 +1612,16 @@
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
-          "cachedResultName": "Hoja 1",
+          "cachedResultName": "citas",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit#gid=0"
         },
         "filtersUI": {
-          "values": [{"lookupColumn": "id", "lookupValue": "={{ $('Procesar Cancel Data').item.json.eventId }}"}]
+          "values": [
+            {
+              "lookupColumn": "id",
+              "lookupValue": "={{ $('Procesar Cancel Data').item.json.eventId }}"
+            }
+          ]
         },
         "options": {}
       },
@@ -858,9 +1629,17 @@
       "name": "Sheets: Buscar fila Cancel",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [300, 2650],
+      "position": [
+        300,
+        2650
+      ],
       "alwaysOutputData": true,
-      "credentials": {"googleSheetsOAuth2Api": {"id": "v7s9GIw4NGmJaHUm", "name": "Google Sheets account"}}
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v7s9GIw4NGmJaHUm",
+          "name": "Google Sheets account"
+        }
+      }
     },
     {
       "parameters": {
@@ -876,7 +1655,7 @@
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
-          "cachedResultName": "Hoja 1",
+          "cachedResultName": "citas",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit#gid=0"
         },
         "columns": {
@@ -885,20 +1664,98 @@
             "Status": "2"
           },
           "schema": [
-            {"id": "id", "type": "string", "display": true, "removed": false, "required": false, "displayName": "id", "defaultMatch": true, "canBeUsedToMatch": true},
-            {"id": "Status", "type": "string", "display": true, "required": false, "displayName": "Status", "defaultMatch": false, "canBeUsedToMatch": true}
+            {
+              "id": "id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "id",
+              "defaultMatch": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "NIE",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "NIE",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre Cliente",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "Nombre Cliente",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Telefono",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "Telefono",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Fecha y hora",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "Fecha y hora",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Fecha ISO",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "Fecha ISO",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Status",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Status",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
           ],
           "mappingMode": "defineBelow",
-          "matchingColumns": ["id"]
+          "matchingColumns": [
+            "id"
+          ]
         },
         "options": {}
       },
       "id": "n9-051",
-      "name": "Sheets: Eliminar Fila Cancel",
+      "name": "Sheets: Actualizar Status Cancel",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [500, 2650],
-      "credentials": {"googleSheetsOAuth2Api": {"id": "v7s9GIw4NGmJaHUm", "name": "Google Sheets account"}}
+      "position": [
+        300,
+        2650
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v7s9GIw4NGmJaHUm",
+          "name": "Google Sheets account"
+        }
+      }
     },
     {
       "parameters": {
@@ -909,8 +1766,16 @@
       "name": "Redis: Del Cancel State",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [700, 2650],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        700,
+        2650
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
@@ -924,9 +1789,17 @@
       "name": "Msg: Cita Eliminada",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [900, 2650],
+      "position": [
+        900,
+        2650
+      ],
       "webhookId": "n9-cita-eliminada-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
@@ -937,8 +1810,16 @@
       "name": "Redis: Del Cancel No",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [-300, 2950],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        -300,
+        2950
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
@@ -952,24 +1833,51 @@
       "name": "Msg: Cancelar Abortado",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [-100, 2950],
+      "position": [
+        -100,
+        2950
+      ],
       "webhookId": "n9-cancel-abortado-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
         "conditions": {
-          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
-          "conditions": [{"id": "te1", "operator": {"type": "string", "operation": "notEmpty", "singleValue": true}, "leftValue": "={{ $('Redis: Get State').item.json.propertyName }}", "rightValue": ""}],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "te1",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $('Redis: Get State').item.json.propertyName }}",
+              "rightValue": ""
+            }
+          ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "n9-056",
-      "name": "¿Tiene Estado?",
+      "name": "Tiene Estado?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [-300, 3250]
+      "position": [
+        -300,
+        3250
+      ]
     },
     {
       "parameters": {
@@ -983,9 +1891,17 @@
       "name": "Msg: Ayuda",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [-100, 3400],
+      "position": [
+        -100,
+        3400
+      ],
       "webhookId": "n9-ayuda-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
@@ -993,89 +1909,199 @@
           "values": [
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
-                "conditions": [{"id": "se0", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ JSON.parse($('Redis: Get State').item.json.propertyName || '{}').step || '' }}", "rightValue": "ask_nie_agendar"}]
+                "conditions": [
+                  {
+                    "id": "se0",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ JSON.parse($('Redis: Get State').item.json.propertyName || '{}').step || '' }}",
+                    "rightValue": "ask_nie_agendar"
+                  }
+                ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
-                "conditions": [{"id": "se1", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ JSON.parse($('Redis: Get State').item.json.propertyName || '{}').step || '' }}", "rightValue": "ask_nie_cancelar"}]
+                "conditions": [
+                  {
+                    "id": "se1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ JSON.parse($('Redis: Get State').item.json.propertyName || '{}').step || '' }}",
+                    "rightValue": "ask_nie_cancelar"
+                  }
+                ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
-                "conditions": [{"id": "se2", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ JSON.parse($('Redis: Get State').item.json.propertyName || '{}').step || '' }}", "rightValue": "ask_nie_citas"}]
+                "conditions": [
+                  {
+                    "id": "se2",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ JSON.parse($('Redis: Get State').item.json.propertyName || '{}').step || '' }}",
+                    "rightValue": "ask_nie_citas"
+                  }
+                ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
-                "conditions": [{"id": "se3", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ JSON.parse($('Redis: Get State').item.json.propertyName || '{}').step || '' }}", "rightValue": "ask_name"}]
+                "conditions": [
+                  {
+                    "id": "se3",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ JSON.parse($('Redis: Get State').item.json.propertyName || '{}').step || '' }}",
+                    "rightValue": "ask_name"
+                  }
+                ]
               }
             },
             {
               "conditions": {
-                "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
                 "combinator": "and",
-                "conditions": [{"id": "se4", "operator": {"type": "string", "operation": "equals"}, "leftValue": "={{ JSON.parse($('Redis: Get State').item.json.propertyName || '{}').step || '' }}", "rightValue": "ask_date_manual"}]
+                "conditions": [
+                  {
+                    "id": "se4",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ JSON.parse($('Redis: Get State').item.json.propertyName || '{}').step || '' }}",
+                    "rightValue": "ask_date_manual"
+                  }
+                ]
               }
             }
           ]
         },
-        "options": {"fallbackOutput": "extra"}
+        "options": {
+          "fallbackOutput": "extra"
+        }
       },
       "id": "n9-058",
       "name": "Switch Estado",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
-      "position": [-100, 3250]
+      "position": [
+        -100,
+        3250
+      ]
     },
     {
       "parameters": {
         "operation": "send",
         "phoneNumberId": "={{ $('data_citas').item.json.phoneNumberId }}",
         "recipientPhoneNumber": "={{ $('data_citas').item.json.chatId }}",
-        "textBody": "=Escribe *Hola* para reiniciar o elige una opcion del menu.",
+        "textBody": "={{ $json.message }}",
         "additionalFields": {}
       },
       "id": "n9-059",
       "name": "Msg: Estado Desconocido",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [100, 3450],
+      "position": [
+        300,
+        3650
+      ],
       "webhookId": "n9-estado-desc-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const nie = $('data_citas').item.json.messageText.trim().toUpperCase();\nconst letters = 'TRWAGMYFPDXBNJZSQVHLCKE';\nconst prefix = {'X':'0','Y':'1','Z':'2'};\nif (!/^[XYZ]\\d{7}[A-Z]$/.test(nie)) {\n  return { valid: false, error: '\\u274C NIE inválido. Formato correcto: *X1234567L*\\n\\nEscríbelo de nuevo:' };\n}\nconst num = parseInt(prefix[nie[0]] + nie.slice(1,8));\nif (nie[8] !== letters[num % 23]) {\n  return { valid: false, error: `\\u274C El NIE *${nie}* tiene letra de control incorrecta.\\n\\nEscríbelo de nuevo:` };\n}\nreturn { valid: true, nie };"
+        "jsCode": "const nie = $('data_citas').item.json.messageText.trim().toUpperCase();\nconst letters = 'TRWAGMYFPDXBNJZSQVHLCKE';\nconst prefix = {'X':'0','Y':'1','Z':'2'};\nif (!/^[XYZ]\\d{7}[A-Z]$/.test(nie)) {\n  return { valid: false, error: '\\u274C NIE inv\\u00e1lido. Formato correcto: *X1234567L*\\n\\nEscr\\u00edbelo de nuevo:' };\n}\nconst num = parseInt(prefix[nie[0]] + nie.slice(1,8));\nif (nie[8] !== letters[num % 23]) {\n  return { valid: false, error: `\\u274C El NIE *${nie}* tiene letra de control incorrecta.\\n\\nEscr\\u00edbelo de nuevo:` };\n}\nreturn { valid: true, nie };"
       },
       "id": "n9-060",
       "name": "Validar NIE (Agendar)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [100, 2950]
+      "position": [
+        100,
+        2950
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
-          "conditions": [{"id": "na1", "operator": {"type": "boolean", "operation": "true", "singleValue": true}, "leftValue": "={{ $json.valid }}", "rightValue": ""}],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "na1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": ""
+            }
+          ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "n9-061",
-      "name": "¿NIE A Válido?",
+      "name": "NIE A Valido?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [300, 2950]
+      "position": [
+        300,
+        2950
+      ]
     },
     {
       "parameters": {
@@ -1086,26 +2112,45 @@
         "additionalFields": {}
       },
       "id": "n9-062",
-      "name": "Msg: NIE Inválido",
+      "name": "Msg: NIE Invalido",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [500, 3100],
+      "position": [
+        500,
+        3100
+      ],
       "webhookId": "n9-nie-invalido-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
         "operation": "set",
         "key": "={{ 'state:' + $('data_citas').item.json.chatId }}",
-        "value": "={{ JSON.stringify({ step: 'ask_name', nie: $('Validar NIE (Agendar)').item.json.nie }) }}",
-        "additionalFields": {"expire": true, "ttl": 900}
+        "value": "={{ JSON.stringify({ step: 'ask_name', nie: $('Validar NIE (Agendar)').item.json.nie, ts: Date.now() }) }}",
+        "additionalFields": {
+          "expire": true,
+          "ttl": 900
+        }
       },
       "id": "n9-063",
       "name": "Redis: Set State Ask Name",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [500, 2950],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        500,
+        2950
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
@@ -1119,34 +2164,64 @@
       "name": "Msg: Pedir Nombre",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [700, 2950],
+      "position": [
+        700,
+        2950
+      ],
       "webhookId": "n9-pedir-nombre-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const nie = $('data_citas').item.json.messageText.trim().toUpperCase();\nconst letters = 'TRWAGMYFPDXBNJZSQVHLCKE';\nconst prefix = {'X':'0','Y':'1','Z':'2'};\nif (!/^[XYZ]\\d{7}[A-Z]$/.test(nie)) {\n  return { valid: false, error: '\\u274C NIE inválido. Formato correcto: *X1234567L*\\n\\nEscríbelo de nuevo:' };\n}\nconst num = parseInt(prefix[nie[0]] + nie.slice(1,8));\nif (nie[8] !== letters[num % 23]) {\n  return { valid: false, error: `\\u274C El NIE *${nie}* tiene letra de control incorrecta.\\n\\nEscríbelo de nuevo:` };\n}\nreturn { valid: true, nie };"
+        "jsCode": "const nie = $('data_citas').item.json.messageText.trim().toUpperCase();\nconst letters = 'TRWAGMYFPDXBNJZSQVHLCKE';\nconst prefix = {'X':'0','Y':'1','Z':'2'};\nif (!/^[XYZ]\\d{7}[A-Z]$/.test(nie)) {\n  return { valid: false, error: '\\u274C NIE inv\\u00e1lido. Formato correcto: *X1234567L*\\n\\nEscr\\u00edbelo de nuevo:' };\n}\nconst num = parseInt(prefix[nie[0]] + nie.slice(1,8));\nif (nie[8] !== letters[num % 23]) {\n  return { valid: false, error: `\\u274C El NIE *${nie}* tiene letra de control incorrecta.\\n\\nEscr\\u00edbelo de nuevo:` };\n}\nreturn { valid: true, nie };"
       },
       "id": "n9-065",
       "name": "Validar NIE (Cancelar)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [100, 3350]
+      "position": [
+        100,
+        3350
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
-          "conditions": [{"id": "nc1", "operator": {"type": "boolean", "operation": "true", "singleValue": true}, "leftValue": "={{ $json.valid }}", "rightValue": ""}],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "nc1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": ""
+            }
+          ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "n9-066",
-      "name": "¿NIE C Válido?",
+      "name": "NIE C Valido?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [300, 3350]
+      "position": [
+        300,
+        3350
+      ]
     },
     {
       "parameters": {
@@ -1161,13 +2236,19 @@
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
-          "cachedResultName": "Hoja 1",
+          "cachedResultName": "citas",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit#gid=0"
         },
         "filtersUI": {
           "values": [
-            {"lookupColumn": "NIE", "lookupValue": "={{ $('Validar NIE (Cancelar)').item.json.nie }}"},
-            {"lookupColumn": "Status", "lookupValue": "1"}
+            {
+              "lookupColumn": "NIE",
+              "lookupValue": "={{ $('Validar NIE (Cancelar)').item.json.nie }}"
+            },
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "1"
+            }
           ]
         },
         "options": {}
@@ -1176,9 +2257,17 @@
       "name": "Sheets: Buscar Citas (Cancel)",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [500, 3350],
+      "position": [
+        500,
+        3350
+      ],
       "alwaysOutputData": true,
-      "credentials": {"googleSheetsOAuth2Api": {"id": "v7s9GIw4NGmJaHUm", "name": "Google Sheets account"}}
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v7s9GIw4NGmJaHUm",
+          "name": "Google Sheets account"
+        }
+      }
     },
     {
       "parameters": {
@@ -1188,22 +2277,44 @@
       "name": "Verificar Citas (Cancel)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [700, 3350]
+      "position": [
+        700,
+        3350
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
-          "conditions": [{"id": "cc1", "operator": {"type": "boolean", "operation": "true", "singleValue": true}, "leftValue": "={{ $json.hasCitas }}", "rightValue": ""}],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cc1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.hasCitas }}",
+              "rightValue": ""
+            }
+          ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "n9-069",
-      "name": "¿Citas Cancel?",
+      "name": "Citas Cancel?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [900, 3350]
+      "position": [
+        900,
+        3350
+      ]
     },
     {
       "parameters": {
@@ -1217,9 +2328,17 @@
       "name": "Msg: Sin Citas Cancel",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [1100, 3200],
+      "position": [
+        1100,
+        3200
+      ],
       "webhookId": "n9-sin-citas-cancel-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
@@ -1229,31 +2348,48 @@
       "name": "Preparar Lista Cancelar",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1100, 3350]
+      "position": [
+        1100,
+        3350
+      ]
     },
     {
       "parameters": {
         "operation": "set",
         "key": "={{ 'cancel_list:' + $('data_citas').item.json.chatId }}",
         "value": "={{ JSON.stringify($json.listItems) }}",
-        "additionalFields": {"expire": true, "ttl": 900}
+        "additionalFields": {
+          "expire": true,
+          "ttl": 900
+        }
       },
       "id": "n9-072",
       "name": "Redis: Guardar Lista Cancel",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [1300, 3350],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        1300,
+        3350
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const rows = $('Preparar Lista Cancelar').item.json.rows;\nconst body = {\n  messaging_product: 'whatsapp',\n  recipient_type: 'individual',\n  to: $('data_citas').item.json.chatId,\n  type: 'interactive',\n  interactive: {\n    type: 'list',\n    header: { type: 'text', text: '\\u274C \\u00bfCuál cita cancelar?' },\n    body: { text: 'Estas son tus próximas citas.\\nSelecciona la que deseas cancelar:' },\n    footer: { text: 'La cancelación no se puede deshacer' },\n    action: { button: 'Ver citas', sections: [{ title: 'Mis citas', rows }] }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
+        "jsCode": "const rows = $('Preparar Lista Cancelar').item.json.rows;\nconst body = {\n  messaging_product: 'whatsapp',\n  recipient_type: 'individual',\n  to: $('data_citas').item.json.chatId,\n  type: 'interactive',\n  interactive: {\n    type: 'list',\n    header: { type: 'text', text: '\\u274C \\u00bfCu\\u00e1l cita cancelar?' },\n    body: { text: 'Estas son tus pr\\u00f3ximas citas.\\nSelecciona la que deseas cancelar:' },\n    footer: { text: 'La cancelaci\\u00f3n no se puede deshacer' },\n    action: { button: 'Ver citas', sections: [{ title: 'Mis citas', rows }] }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
       },
       "id": "n9-073",
       "name": "Preparar WA Lista Cancel",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1500, 3350]
+      "position": [
+        1500,
+        3350
+      ]
     },
     {
       "parameters": {
@@ -1271,33 +2407,63 @@
       "name": "Msg: Lista Para Cancelar",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1700, 3350],
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "position": [
+        1700,
+        3350
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const nie = $('data_citas').item.json.messageText.trim().toUpperCase();\nconst letters = 'TRWAGMYFPDXBNJZSQVHLCKE';\nconst prefix = {'X':'0','Y':'1','Z':'2'};\nif (!/^[XYZ]\\d{7}[A-Z]$/.test(nie)) {\n  return { valid: false, error: '\\u274C NIE inválido. Formato correcto: *X1234567L*\\n\\nEscríbelo de nuevo:' };\n}\nconst num = parseInt(prefix[nie[0]] + nie.slice(1,8));\nif (nie[8] !== letters[num % 23]) {\n  return { valid: false, error: `\\u274C El NIE *${nie}* tiene letra de control incorrecta.\\n\\nEscríbelo de nuevo:` };\n}\nreturn { valid: true, nie };"
+        "jsCode": "const nie = $('data_citas').item.json.messageText.trim().toUpperCase();\nconst letters = 'TRWAGMYFPDXBNJZSQVHLCKE';\nconst prefix = {'X':'0','Y':'1','Z':'2'};\nif (!/^[XYZ]\\d{7}[A-Z]$/.test(nie)) {\n  return { valid: false, error: '\\u274C NIE inv\\u00e1lido. Formato correcto: *X1234567L*\\n\\nEscr\\u00edbelo de nuevo:' };\n}\nconst num = parseInt(prefix[nie[0]] + nie.slice(1,8));\nif (nie[8] !== letters[num % 23]) {\n  return { valid: false, error: `\\u274C El NIE *${nie}* tiene letra de control incorrecta.\\n\\nEscr\\u00edbelo de nuevo:` };\n}\nreturn { valid: true, nie };"
       },
       "id": "n9-075",
       "name": "Validar NIE (Citas)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [100, 3750]
+      "position": [
+        100,
+        3750
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
-          "conditions": [{"id": "nci1", "operator": {"type": "boolean", "operation": "true", "singleValue": true}, "leftValue": "={{ $json.valid }}", "rightValue": ""}],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "nci1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": ""
+            }
+          ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "n9-076",
-      "name": "¿NIE CI Válido?",
+      "name": "NIE CI Valido?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [300, 3750]
+      "position": [
+        300,
+        3750
+      ]
     },
     {
       "parameters": {
@@ -1312,13 +2478,19 @@
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
-          "cachedResultName": "Hoja 1",
+          "cachedResultName": "citas",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit#gid=0"
         },
         "filtersUI": {
           "values": [
-            {"lookupColumn": "NIE", "lookupValue": "={{ $('Validar NIE (Citas)').item.json.nie }}"},
-            {"lookupColumn": "Status", "lookupValue": "1"}
+            {
+              "lookupColumn": "NIE",
+              "lookupValue": "={{ $('Validar NIE (Citas)').item.json.nie }}"
+            },
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "1"
+            }
           ]
         },
         "options": {}
@@ -1327,19 +2499,30 @@
       "name": "Sheets: Buscar Citas (CI)",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [500, 3750],
+      "position": [
+        500,
+        3750
+      ],
       "alwaysOutputData": true,
-      "credentials": {"googleSheetsOAuth2Api": {"id": "v7s9GIw4NGmJaHUm", "name": "Google Sheets account"}}
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v7s9GIw4NGmJaHUm",
+          "name": "Google Sheets account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const zone = 'America/Guayaquil';\nconst now = DateTime.now().setZone(zone);\nconst citas = $items().map(i => i.json)\n  .filter(c => c['Fecha ISO'] && DateTime.fromISO(c['Fecha ISO'], { zone }) > now)\n  .sort((a, b) => (a['Fecha ISO'] || '').localeCompare(b['Fecha ISO'] || ''));\nif (citas.length === 0) {\n  return { hasCitas: false, message: '\\uD83E\\uDD14 No encontramos citas próximas asociadas a tu NIE.\\n\\nEscribe *Agendar* para reservar una cita.' };\n}\nlet msg = '\\uD83D\\uDCCB *Tus próximas citas:*\\n\\n';\ncitas.forEach((c, i) => {\n  const dt = DateTime.fromISO(c['Fecha ISO'], { zone }).setLocale('es');\n  msg += `${i+1}. \\uD83D\\uDDD3\\uFE0F ${dt.toFormat(\"cccc dd 'de' MMMM 'a las' HH:mm\")}\\n`;\n});\nreturn { hasCitas: true, message: msg };"
+        "jsCode": "const zone = 'America/Guayaquil';\nconst now = DateTime.now().setZone(zone);\nconst citas = $items().map(i => i.json)\n  .filter(c => c['Fecha ISO'] && DateTime.fromISO(c['Fecha ISO'], { zone }) > now)\n  .sort((a, b) => (a['Fecha ISO'] || '').localeCompare(b['Fecha ISO'] || ''));\nif (citas.length === 0) {\n  return { hasCitas: false, message: '\\uD83E\\uDD14 No encontramos citas pr\\u00f3ximas asociadas a tu NIE.\\n\\nEscribe *Agendar* para reservar una cita.' };\n}\nlet msg = '\\uD83D\\uDCCB *Tus pr\\u00f3ximas citas:*\\n\\n';\ncitas.forEach((c, i) => {\n  const dt = DateTime.fromISO(c['Fecha ISO'], { zone }).setLocale('es');\n  msg += `${i+1}. \\uD83D\\uDDD3\\uFE0F ${dt.toFormat(\"cccc dd 'de' MMMM 'a las' HH:mm\")}\\n`;\n});\nreturn { hasCitas: true, message: msg };"
       },
       "id": "n9-078",
       "name": "Formatear Citas",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [700, 3750]
+      "position": [
+        700,
+        3750
+      ]
     },
     {
       "parameters": {
@@ -1353,34 +2536,64 @@
       "name": "Msg: Mostrar Citas",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [900, 3750],
+      "position": [
+        900,
+        3750
+      ],
       "webhookId": "n9-mostrar-citas-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const name = $('data_citas').item.json.messageText.trim();\nif (!name || name.split(/\\s+/).filter(w => w.length > 0).length < 2) {\n  return { valid: false, error: '\\u274C Por favor escribe tu *nombre y apellido completos*.\\n\\nEj: *Juan Pérez*' };\n}\nif (/\\d/.test(name)) {\n  return { valid: false, error: '\\u274C El nombre no debe contener números.\\n\\nEscríbelo de nuevo:' };\n}\nconst raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nreturn { valid: true, name, nie: state.nie || '' };"
+        "jsCode": "const name = $('data_citas').item.json.messageText.trim();\nif (!name || name.split(/\\s+/).filter(w => w.length > 0).length < 2) {\n  return { valid: false, error: '\\u274C Por favor escribe tu *nombre y apellido completos*.\\n\\nEj: *Juan P\\u00e9rez*' };\n}\nif (/\\d/.test(name)) {\n  return { valid: false, error: '\\u274C El nombre no debe contener n\\u00fameros.\\n\\nEscr\\u00edbelo de nuevo:' };\n}\nconst raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nreturn { valid: true, name, nie: state.nie || '' };"
       },
       "id": "n9-080",
       "name": "Procesar Nombre",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [100, 4150]
+      "position": [
+        100,
+        4150
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
-          "conditions": [{"id": "pn1", "operator": {"type": "boolean", "operation": "true", "singleValue": true}, "leftValue": "={{ $json.valid }}", "rightValue": ""}],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "pn1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": ""
+            }
+          ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "n9-081",
-      "name": "¿Nombre Válido?",
+      "name": "Nombre Valido?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [300, 4150]
+      "position": [
+        300,
+        4150
+      ]
     },
     {
       "parameters": {
@@ -1391,26 +2604,45 @@
         "additionalFields": {}
       },
       "id": "n9-082",
-      "name": "Msg: Nombre Inválido",
+      "name": "Msg: Nombre Invalido",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [500, 4300],
+      "position": [
+        500,
+        4300
+      ],
       "webhookId": "n9-nombre-invalido-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
         "operation": "set",
         "key": "={{ 'state:' + $('data_citas').item.json.chatId }}",
-        "value": "={{ JSON.stringify({ step: 'ask_date', nie: $json.nie, name: $json.name }) }}",
-        "additionalFields": {"expire": true, "ttl": 900}
+        "value": "={{ JSON.stringify({ step: 'ask_date', nie: $json.nie, name: $json.name, ts: Date.now() }) }}",
+        "additionalFields": {
+          "expire": true,
+          "ttl": 900
+        }
       },
       "id": "n9-083",
       "name": "Redis: Set State Ask Date",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [500, 4150],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        500,
+        4150
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
@@ -1420,17 +2652,23 @@
       "name": "Preparar Calendario",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [700, 4150]
+      "position": [
+        700,
+        4150
+      ]
     },
     {
       "parameters": {
-        "jsCode": "const { rows, name, nie } = $json;\nconst body = {\n  messaging_product: 'whatsapp',\n  recipient_type: 'individual',\n  to: $('data_citas').item.json.chatId,\n  type: 'interactive',\n  interactive: {\n    type: 'list',\n    header: { type: 'text', text: '\\uD83D\\uDCC5 Elige una fecha' },\n    body: { text: `Hola *${name}* \\uD83D\\uDC4B\\n\\nEstos son los días disponibles para tu cita.\\nSelecciona uno o elige ‘Otra fecha’ para una fecha específica:` },\n    footer: { text: 'Lun-Vie: 07:00-19:00 | Sáb: 07:00-13:00' },\n    action: { button: 'Ver fechas', sections: [{ title: 'Próximas fechas', rows }] }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
+        "jsCode": "const { rows, name, nie } = $json;\nconst body = {\n  messaging_product: 'whatsapp',\n  recipient_type: 'individual',\n  to: $('data_citas').item.json.chatId,\n  type: 'interactive',\n  interactive: {\n    type: 'list',\n    header: { type: 'text', text: '\\uD83D\\uDCC5 Elige una fecha' },\n    body: { text: `Hola *${name}* \\uD83D\\uDC4B\\n\\nEstos son los d\\u00edas disponibles para tu cita.\\nSelecciona uno o elige ‘Otra fecha’ para una fecha espec\\u00edfica:` },\n    footer: { text: 'Lun-Vie: 07:00-19:00 | S\\u00e1b: 07:00-13:00' },\n    action: { button: 'Ver fechas', sections: [{ title: 'Pr\\u00f3ximas fechas', rows }] }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
       },
       "id": "n9-085",
       "name": "Preparar WA Calendario",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [900, 4150]
+      "position": [
+        900,
+        4150
+      ]
     },
     {
       "parameters": {
@@ -1448,33 +2686,63 @@
       "name": "Msg: Seleccionar Fecha",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1100, 4150],
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "position": [
+        1100,
+        4150
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
-        "jsCode": "const input = $('data_citas').item.json.messageText.trim();\nconst raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nconst nie = state.nie || '';\nconst name = state.name || $('data_citas').item.json.pushName || 'Cliente';\nconst dateRegex = /^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$/;\nif (!dateRegex.test(input)) {\n  return { valid: false, nie, name, error: '\\u274C Formato incorrecto. Escribe la fecha como:\\n\\n*AAAA-MM-DD*\\n\\nEj: *2026-06-15*' };\n}\nconst zone = 'America/Guayaquil';\nconst dt = DateTime.fromISO(input, { zone });\nif (!dt.isValid) {\n  return { valid: false, nie, name, error: '\\u274C Fecha inválida. Verifica que exista.' };\n}\nif (dt < DateTime.now().setZone(zone).startOf('day')) {\n  return { valid: false, nie, name, error: '\\u274C Esa fecha ya pasó. Elige una fecha futura.' };\n}\nif (dt.weekday === 7) {\n  return { valid: false, nie, name, error: '\\u274C No atendemos los domingos. Elige otro día.' };\n}\nreturn { valid: true, date: input, nie, name };"
+        "jsCode": "const input = $('data_citas').item.json.messageText.trim();\nconst raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nconst nie = state.nie || '';\nconst name = state.name || $('data_citas').item.json.pushName || 'Cliente';\nconst dateRegex = /^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$/;\nif (!dateRegex.test(input)) {\n  return { valid: false, nie, name, error: '\\u274C Formato incorrecto. Escribe la fecha como:\\n\\n*AAAA-MM-DD*\\n\\nEj: *2026-06-15*' };\n}\nconst zone = 'America/Guayaquil';\nconst dt = DateTime.fromISO(input, { zone });\nif (!dt.isValid) {\n  return { valid: false, nie, name, error: '\\u274C Fecha inv\\u00e1lida. Verifica que exista.' };\n}\nif (dt < DateTime.now().setZone(zone).startOf('day')) {\n  return { valid: false, nie, name, error: '\\u274C Esa fecha ya pas\\u00f3. Elige una fecha futura.' };\n}\nif (dt.weekday === 7) {\n  return { valid: false, nie, name, error: '\\u274C No atendemos los domingos. Elige otro d\\u00eda.' };\n}\nreturn { valid: true, date: input, nie, name };"
       },
       "id": "n9-087",
       "name": "Procesar Fecha Manual",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [100, 4550]
+      "position": [
+        100,
+        4550
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": {"caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 2},
-          "conditions": [{"id": "fmv1", "operator": {"type": "boolean", "operation": "true", "singleValue": true}, "leftValue": "={{ $json.valid }}", "rightValue": ""}],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fmv1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": ""
+            }
+          ],
           "combinator": "and"
         },
         "options": {}
       },
       "id": "n9-088",
-      "name": "¿Fecha Manual Válida?",
+      "name": "Fecha Manual Valida?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [300, 4550]
+      "position": [
+        300,
+        4550
+      ]
     },
     {
       "parameters": {
@@ -1485,12 +2753,20 @@
         "additionalFields": {}
       },
       "id": "n9-089",
-      "name": "Msg: Fecha Inválida",
+      "name": "Msg: Fecha Invalida",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [500, 4700],
+      "position": [
+        500,
+        4700
+      ],
       "webhookId": "n9-fecha-invalida-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
@@ -1501,8 +2777,16 @@
       "name": "Redis: Del State Terminal",
       "type": "n8n-nodes-base.redis",
       "typeVersion": 1,
-      "position": [300, 4900],
-      "credentials": {"redis": {"id": "V0yeP2XjW2OcieOH", "name": "Redis account"}}
+      "position": [
+        300,
+        4900
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     },
     {
       "parameters": {
@@ -1512,7 +2796,10 @@
       "name": "Preparar Otro Servicio",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [500, 4900]
+      "position": [
+        500,
+        4900
+      ]
     },
     {
       "parameters": {
@@ -1530,8 +2817,16 @@
       "name": "Msg: Otro Servicio",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [700, 4900],
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "position": [
+        700,
+        4900
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
     },
     {
       "parameters": {
@@ -1545,288 +2840,1294 @@
       "name": "Msg: Despedida",
       "type": "n8n-nodes-base.whatsApp",
       "typeVersion": 1,
-      "position": [900, 4900],
+      "position": [
+        900,
+        4900
+      ],
       "webhookId": "n9-despedida-v9",
-      "credentials": {"whatsAppApi": {"id": "1f2q6YddW8j5CiqZ", "name": "WhatsApp account"}}
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nconst step = state.step || '';\nconst messages = {\n  'ask_nie_agendar': 'No te entend\\u00ed. \\u270f\\ufe0f\\n\\nPor favor escribe tu *NIE* para agendar tu cita.\\nFormato: *X1234567L*',\n  'ask_nie_cancelar': 'No te entend\\u00ed. \\u270f\\ufe0f\\n\\nPor favor escribe tu *NIE* para ver tus citas y cancelar.\\nFormato: *X1234567L*',\n  'ask_nie_citas': 'No te entend\\u00ed. \\u270f\\ufe0f\\n\\nPor favor escribe tu *NIE* para consultar tus citas.\\nFormato: *X1234567L*',\n  'ask_name': 'No te entend\\u00ed. \\u270f\\ufe0f\\n\\nPor favor escribe tu *nombre y apellido completos*.\\nEjemplo: *Juan Perez*',\n  'ask_date': 'No te entend\\u00ed.\\n\\nPor favor *selecciona una fecha* del calendario o elige la opci\\u00f3n para escribirla manualmente.',\n  'ask_date_manual': 'No te entend\\u00ed. \\u270f\\ufe0f\\n\\nPor favor escribe la fecha en formato *AAAA-MM-DD*.\\nEjemplo: *2026-06-15*',\n  'confirmar': 'No te entend\\u00ed.\\n\\nPor favor usa los *botones* para confirmar o cancelar tu cita.'\n};\nconst message = messages[step] || 'No te entend\\u00ed.\\n\\nEscribe *Hola* para ver el men\\u00fa de opciones.';\nreturn { message };"
+      },
+      "id": "n9-094",
+      "name": "Preparar No Entendi",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        3650
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      },
+      "id": "n9-095",
+      "name": "Schedule: Verificar Inactividad",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -300,
+        5400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "keys",
+        "keyPattern": "state:*"
+      },
+      "id": "n9-096",
+      "name": "Redis: KEYS Activos",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        5400
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const keys = $json.keys || [];\nif (keys.length === 0) return [];\nreturn keys.map(key => ({ key, chatId: key.replace('state:', '') }));"
+      },
+      "id": "n9-097",
+      "name": "Split Keys",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        5400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $json.key }}",
+        "options": {}
+      },
+      "id": "n9-098",
+      "name": "Redis: GET Por Clave",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        300,
+        5400
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ia1",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ (() => { try { const s = JSON.parse($json.propertyName || '{}'); return !!s.ts && !!s.step && (Date.now() - s.ts) > 300000; } catch(e) { return false; } })() }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "n9-099",
+      "name": "Estado Inactivo?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        500,
+        5400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const key = $('Split Keys').item.json.key;\nconst chatId = key.replace('state:', '');\nconst phoneNumberId = '1126266787234598';\nlet state = {};\ntry { state = JSON.parse($json.propertyName || '{}'); } catch(e) {}\nconst step = state.step || '';\nconst prompts = {\n  'ask_nie_agendar': 'Parece que dejaste tu solicitud de *agendar cita* a medias.\\n\\n\\u270f\\ufe0f Escribe tu *NIE* para continuar.\\nFormato: *X1234567L*',\n  'ask_nie_cancelar': 'Parece que dejaste tu solicitud de *cancelar cita* a medias.\\n\\n\\u270f\\ufe0f Escribe tu *NIE* para continuar.',\n  'ask_nie_citas': 'Parece que dejaste tu consulta de *citas* a medias.\\n\\n\\u270f\\ufe0f Escribe tu *NIE* para continuar.',\n  'ask_name': 'Parece que dejaste tu solicitud de *agendar cita* a medias.\\n\\n\\u270f\\ufe0f Escribe tu *nombre y apellido completos* para continuar.',\n  'ask_date': 'Parece que dejaste tu solicitud de *agendar cita* a medias.\\n\\n\\uD83D\\uDCC5 Selecciona una *fecha* del calendario para continuar.',\n  'ask_date_manual': 'Parece que dejaste tu solicitud de *agendar cita* a medias.\\n\\n\\u270f\\ufe0f Escribe la fecha en formato *AAAA-MM-DD* para continuar.',\n  'confirmar': 'Parece que dejaste tu solicitud de *agendar cita* a medias.\\n\\n\\u2705 Usa los *botones* para confirmar o cancelar tu cita.'\n};\nconst prompt = prompts[step] || 'Parece que dejaste tu conversaci\\u00f3n a medias.\\n\\nEscribe *Hola* para continuar.';\nconst body = {\n  messaging_product: 'whatsapp',\n  to: chatId,\n  type: 'text',\n  text: { body: '\\uD83D\\uDC4B \\u00a1Hola de nuevo!\\n\\n' + prompt + '\\n\\n_Escribe *Hola* si deseas reiniciar desde el men\\u00fa._' }\n};\nconst updatedState = { ...state, ts: Date.now() };\nreturn { bodyJson: JSON.stringify(body), stateKey: key, updatedState: JSON.stringify(updatedState), phoneNumberId };"
+      },
+      "id": "n9-100",
+      "name": "Preparar Recordatorio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        5400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v25.0/{{ $json.phoneNumberId }}/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.bodyJson }}",
+        "options": {}
+      },
+      "id": "n9-101",
+      "name": "Msg: Recordatorio Inactividad",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        900,
+        5400
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "1f2q6YddW8j5CiqZ",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $('Preparar Recordatorio').item.json.stateKey }}",
+        "value": "={{ $('Preparar Recordatorio').item.json.updatedState }}",
+        "additionalFields": {
+          "expire": true,
+          "ttl": 900
+        }
+      },
+      "id": "n9-102",
+      "name": "Redis: Actualizar TS",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        5400
+      ],
+      "credentials": {
+        "redis": {
+          "id": "V0yeP2XjW2OcieOH",
+          "name": "Redis account"
+        }
+      }
     }
   ],
   "pinData": {},
   "connections": {
     "WA Cloud Verify (GET)": {
-      "main": [[{"node": "¿Token correcto?", "type": "main", "index": 0}]]
-    },
-    "WA Cloud Trigger (POST)": {
-      "main": [[{"node": "Filtrar mensajes válidos", "type": "main", "index": 0}]]
-    },
-    "¿Token correcto?": {
       "main": [
-        [{"node": "Respond Challenge", "type": "main", "index": 0}],
-        [{"node": "Respond 403", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Token correcto?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
-    "Filtrar mensajes válidos": {
-      "main": [[{"node": "data_citas", "type": "main", "index": 0}]]
+    "WA Cloud Trigger (POST)": {
+      "main": [
+        [
+          {
+            "node": "Filtrar mensajes validos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Token correcto?": {
+      "main": [
+        [
+          {
+            "node": "Respond Challenge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 403",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar mensajes validos": {
+      "main": [
+        [
+          {
+            "node": "data_citas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "data_citas": {
-      "main": [[{"node": "Redis: Get State", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Redis: Get State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Get State": {
-      "main": [[{"node": "Switch Comando", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Switch Comando",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Switch Comando": {
       "main": [
-        [{"node": "Redis: Del State Menu", "type": "main", "index": 0}],
-        [{"node": "Redis: Set State Agendar", "type": "main", "index": 0}],
-        [{"node": "Redis: Set State Cancelar", "type": "main", "index": 0}],
-        [{"node": "Redis: Set State Citas", "type": "main", "index": 0}],
-        [{"node": "Procesar Confirmación", "type": "main", "index": 0}],
-        [{"node": "Redis: Del State No", "type": "main", "index": 0}],
-        [{"node": "Procesar Slot", "type": "main", "index": 0}],
-        [{"node": "Procesar Fecha Seleccionada", "type": "main", "index": 0}],
-        [{"node": "Redis: Get Cancel List", "type": "main", "index": 0}],
-        [{"node": "Redis: Get Cancel Pending", "type": "main", "index": 0}],
-        [{"node": "Redis: Del Cancel No", "type": "main", "index": 0}],
-        [{"node": "Msg: Despedida", "type": "main", "index": 0}],
-        [{"node": "¿Tiene Estado?", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Redis: Del State Menu",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis: Set State Agendar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis: Set State Cancelar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis: Set State Citas",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Procesar Confirmacion",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis: Del State No",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Procesar Slot",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Procesar Fecha Seleccionada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis: Get Cancel List",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis: Get Cancel Pending",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis: Del Cancel No",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Msg: Despedida",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tiene Estado?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Redis: Del State Menu": {
-      "main": [[{"node": "Preparar Bienvenida", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Preparar Bienvenida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar Bienvenida": {
-      "main": [[{"node": "Msg: Menu", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Menu",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Set State Agendar": {
-      "main": [[{"node": "Msg: Pedir NIE", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Pedir NIE Agendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Set State Cancelar": {
-      "main": [[{"node": "Msg: Pedir NIE", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Pedir NIE Cancelar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Set State Citas": {
-      "main": [[{"node": "Msg: Pedir NIE", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Pedir NIE Citas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Procesar Confirmación": {
-      "main": [[{"node": "GCal: Verificar Slot", "type": "main", "index": 0}]]
+    "Procesar Confirmacion": {
+      "main": [
+        [
+          {
+            "node": "GCal: Verificar Slot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "GCal: Verificar Slot": {
-      "main": [[{"node": "Verificar Disponibilidad", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Verificar Disponibilidad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Verificar Disponibilidad": {
-      "main": [[{"node": "¿Slot Libre?", "type": "main", "index": 0}]]
-    },
-    "¿Slot Libre?": {
       "main": [
-        [{"node": "GCal: Crear Evento", "type": "main", "index": 0}],
-        [{"node": "Msg: Slot Ocupado", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Slot Libre?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slot Libre?": {
+      "main": [
+        [
+          {
+            "node": "GCal: Crear Evento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Msg: Slot Ocupado",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "GCal: Crear Evento": {
-      "main": [[{"node": "Sheets: Guardar Cita", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Sheets: Guardar Cita",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Sheets: Guardar Cita": {
-      "main": [[{"node": "Redis: Del State Confirm", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Redis: Del State Confirm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Del State Confirm": {
-      "main": [[{"node": "Msg: Cita Confirmada", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Cita Confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Del State No": {
-      "main": [[{"node": "Msg: No Confirmada", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: No Confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Procesar Slot": {
-      "main": [[{"node": "Redis: Set State Confirmar", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Redis: Set State Confirmar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Set State Confirmar": {
-      "main": [[{"node": "Preparar Botones Confirmar", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Preparar Botones Confirmar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar Botones Confirmar": {
-      "main": [[{"node": "Msg: Confirmar Cita", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Confirmar Cita",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Procesar Fecha Seleccionada": {
-      "main": [[{"node": "¿Fecha Manual?", "type": "main", "index": 0}]]
-    },
-    "¿Fecha Manual?": {
       "main": [
-        [{"node": "Redis: Set State Fecha Manual", "type": "main", "index": 0}],
-        [{"node": "GCal: Eventos del día", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Fecha Manual?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fecha Manual?": {
+      "main": [
+        [
+          {
+            "node": "Redis: Set State Fecha Manual",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "GCal: Eventos del dia",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Redis: Set State Fecha Manual": {
-      "main": [[{"node": "Msg: Pedir Fecha Manual", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Pedir Fecha Manual",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "GCal: Eventos del día": {
-      "main": [[{"node": "Calcular Slots", "type": "main", "index": 0}]]
+    "GCal: Eventos del dia": {
+      "main": [
+        [
+          {
+            "node": "Calcular Slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Calcular Slots": {
-      "main": [[{"node": "¿Hay Slots?", "type": "main", "index": 0}]]
-    },
-    "¿Hay Slots?": {
       "main": [
-        [{"node": "Preparar Lista Horarios", "type": "main", "index": 0}],
-        [{"node": "Msg: Sin Slots", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Hay Slots?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hay Slots?": {
+      "main": [
+        [
+          {
+            "node": "Preparar Lista Horarios",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Msg: Sin Slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Preparar Lista Horarios": {
-      "main": [[{"node": "Msg: Seleccionar Hora", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Seleccionar Hora",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Get Cancel List": {
-      "main": [[{"node": "Procesar Selección Cancel", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Procesar Seleccion Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Procesar Selección Cancel": {
-      "main": [[{"node": "Redis: Set Cancel Pending", "type": "main", "index": 0}]]
+    "Procesar Seleccion Cancel": {
+      "main": [
+        [
+          {
+            "node": "Redis: Set Cancel Pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Set Cancel Pending": {
-      "main": [[{"node": "Preparar Botones Cancel", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Preparar Botones Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar Botones Cancel": {
-      "main": [[{"node": "Msg: Confirmar Cancelar", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Confirmar Cancelar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Get Cancel Pending": {
-      "main": [[{"node": "Procesar Cancel Data", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Procesar Cancel Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Procesar Cancel Data": {
-      "main": [[{"node": "GCal: Eliminar Evento", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "GCal: Eliminar Evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "GCal: Eliminar Evento": {
-      "main": [[{"node": "Sheets: Buscar fila Cancel", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Sheets: Actualizar Status Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Sheets: Buscar fila Cancel": {
-      "main": [[{"node": "Sheets: Eliminar Fila Cancel", "type": "main", "index": 0}]]
-    },
-    "Sheets: Eliminar Fila Cancel": {
-      "main": [[{"node": "Redis: Del Cancel State", "type": "main", "index": 0}]]
+    "Sheets: Actualizar Status Cancel": {
+      "main": [
+        [
+          {
+            "node": "Redis: Del Cancel State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Del Cancel State": {
-      "main": [[{"node": "Msg: Cita Eliminada", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Cita Eliminada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Del Cancel No": {
-      "main": [[{"node": "Msg: Cancelar Abortado", "type": "main", "index": 0}]]
-    },
-    "¿Tiene Estado?": {
       "main": [
-        [{"node": "Switch Estado", "type": "main", "index": 0}],
-        [{"node": "Msg: Ayuda", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Msg: Cancelar Abortado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tiene Estado?": {
+      "main": [
+        [
+          {
+            "node": "Switch Estado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Msg: Ayuda",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Switch Estado": {
       "main": [
-        [{"node": "Validar NIE (Agendar)", "type": "main", "index": 0}],
-        [{"node": "Validar NIE (Cancelar)", "type": "main", "index": 0}],
-        [{"node": "Validar NIE (Citas)", "type": "main", "index": 0}],
-        [{"node": "Procesar Nombre", "type": "main", "index": 0}],
-        [{"node": "Procesar Fecha Manual", "type": "main", "index": 0}],
-        [{"node": "Msg: Estado Desconocido", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Validar NIE (Agendar)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Validar NIE (Cancelar)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Validar NIE (Citas)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Procesar Nombre",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Procesar Fecha Manual",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar No Entendi",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar No Entendi": {
+      "main": [
+        [
+          {
+            "node": "Msg: Estado Desconocido",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Validar NIE (Agendar)": {
-      "main": [[{"node": "¿NIE A Válido?", "type": "main", "index": 0}]]
-    },
-    "¿NIE A Válido?": {
       "main": [
-        [{"node": "Redis: Set State Ask Name", "type": "main", "index": 0}],
-        [{"node": "Msg: NIE Inválido", "type": "main", "index": 0}]
+        [
+          {
+            "node": "NIE A Valido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NIE A Valido?": {
+      "main": [
+        [
+          {
+            "node": "Redis: Set State Ask Name",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Msg: NIE Invalido",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Redis: Set State Ask Name": {
-      "main": [[{"node": "Msg: Pedir Nombre", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Pedir Nombre",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Validar NIE (Cancelar)": {
-      "main": [[{"node": "¿NIE C Válido?", "type": "main", "index": 0}]]
-    },
-    "¿NIE C Válido?": {
       "main": [
-        [{"node": "Sheets: Buscar Citas (Cancel)", "type": "main", "index": 0}],
-        [{"node": "Msg: NIE Inválido", "type": "main", "index": 0}]
+        [
+          {
+            "node": "NIE C Valido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NIE C Valido?": {
+      "main": [
+        [
+          {
+            "node": "Sheets: Buscar Citas (Cancel)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Msg: NIE Invalido",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Sheets: Buscar Citas (Cancel)": {
-      "main": [[{"node": "Verificar Citas (Cancel)", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Verificar Citas (Cancel)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Verificar Citas (Cancel)": {
-      "main": [[{"node": "¿Citas Cancel?", "type": "main", "index": 0}]]
-    },
-    "¿Citas Cancel?": {
       "main": [
-        [{"node": "Preparar Lista Cancelar", "type": "main", "index": 0}],
-        [{"node": "Msg: Sin Citas Cancel", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Citas Cancel?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Citas Cancel?": {
+      "main": [
+        [
+          {
+            "node": "Preparar Lista Cancelar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Msg: Sin Citas Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Preparar Lista Cancelar": {
-      "main": [[{"node": "Redis: Guardar Lista Cancel", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Redis: Guardar Lista Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Guardar Lista Cancel": {
-      "main": [[{"node": "Preparar WA Lista Cancel", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Preparar WA Lista Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar WA Lista Cancel": {
-      "main": [[{"node": "Msg: Lista Para Cancelar", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Lista Para Cancelar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Validar NIE (Citas)": {
-      "main": [[{"node": "¿NIE CI Válido?", "type": "main", "index": 0}]]
-    },
-    "¿NIE CI Válido?": {
       "main": [
-        [{"node": "Sheets: Buscar Citas (CI)", "type": "main", "index": 0}],
-        [{"node": "Msg: NIE Inválido", "type": "main", "index": 0}]
+        [
+          {
+            "node": "NIE CI Valido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NIE CI Valido?": {
+      "main": [
+        [
+          {
+            "node": "Sheets: Buscar Citas (CI)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Msg: NIE Invalido",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Sheets: Buscar Citas (CI)": {
-      "main": [[{"node": "Formatear Citas", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Formatear Citas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Formatear Citas": {
-      "main": [[{"node": "Msg: Mostrar Citas", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Mostrar Citas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Procesar Nombre": {
-      "main": [[{"node": "¿Nombre Válido?", "type": "main", "index": 0}]]
-    },
-    "¿Nombre Válido?": {
       "main": [
-        [{"node": "Redis: Set State Ask Date", "type": "main", "index": 0}],
-        [{"node": "Msg: Nombre Inválido", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Nombre Valido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nombre Valido?": {
+      "main": [
+        [
+          {
+            "node": "Redis: Set State Ask Date",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Msg: Nombre Invalido",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Redis: Set State Ask Date": {
-      "main": [[{"node": "Preparar Calendario", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Preparar Calendario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar Calendario": {
-      "main": [[{"node": "Preparar WA Calendario", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Preparar WA Calendario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar WA Calendario": {
-      "main": [[{"node": "Msg: Seleccionar Fecha", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Seleccionar Fecha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Procesar Fecha Manual": {
-      "main": [[{"node": "¿Fecha Manual Válida?", "type": "main", "index": 0}]]
-    },
-    "¿Fecha Manual Válida?": {
       "main": [
-        [{"node": "GCal: Eventos del día", "type": "main", "index": 0}],
-        [{"node": "Msg: Fecha Inválida", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Fecha Manual Valida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fecha Manual Valida?": {
+      "main": [
+        [
+          {
+            "node": "GCal: Eventos del dia",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Msg: Fecha Invalida",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Msg: Mostrar Citas": {
-      "main": [[{"node": "Redis: Del State Terminal", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Redis: Del State Terminal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Msg: Sin Citas Cancel": {
-      "main": [[{"node": "Redis: Del State Terminal", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Redis: Del State Terminal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Msg: Sin Slots": {
-      "main": [[{"node": "Redis: Del State Terminal", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Redis: Del State Terminal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Msg: Cita Confirmada": {
-      "main": [[{"node": "Redis: Del State Terminal", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Redis: Del State Terminal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Msg: Cita Eliminada": {
-      "main": [[{"node": "Redis: Del State Terminal", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Redis: Del State Terminal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Msg: No Confirmada": {
-      "main": [[{"node": "Redis: Del State Terminal", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Redis: Del State Terminal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Msg: Cancelar Abortado": {
-      "main": [[{"node": "Redis: Del State Terminal", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Redis: Del State Terminal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Redis: Del State Terminal": {
-      "main": [[{"node": "Preparar Otro Servicio", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Preparar Otro Servicio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Preparar Otro Servicio": {
-      "main": [[{"node": "Msg: Otro Servicio", "type": "main", "index": 0}]]
+      "main": [
+        [
+          {
+            "node": "Msg: Otro Servicio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule: Verificar Inactividad": {
+      "main": [
+        [
+          {
+            "node": "Redis: KEYS Activos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis: KEYS Activos": {
+      "main": [
+        [
+          {
+            "node": "Split Keys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Keys": {
+      "main": [
+        [
+          {
+            "node": "Redis: GET Por Clave",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis: GET Por Clave": {
+      "main": [
+        [
+          {
+            "node": "Estado Inactivo?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Estado Inactivo?": {
+      "main": [
+        [
+          {
+            "node": "Preparar Recordatorio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Preparar Recordatorio": {
+      "main": [
+        [
+          {
+            "node": "Msg: Recordatorio Inactividad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Msg: Recordatorio Inactividad": {
+      "main": [
+        [
+          {
+            "node": "Redis: Actualizar TS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
