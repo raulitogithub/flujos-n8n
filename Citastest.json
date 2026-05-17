@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "Citastest",
   "nodes": [
     {
@@ -259,7 +259,7 @@
                       "operation": "equals"
                     },
                     "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}",
-                    "rightValue": "menú"
+                    "rightValue": "menÃº"
                   },
                   {
                     "id": "sw1e",
@@ -365,7 +365,7 @@
                       "operation": "equals"
                     },
                     "leftValue": "={{ $('data_citas').item.json.messageText.toLowerCase() }}",
-                    "rightValue": "sí"
+                    "rightValue": "sÃ­"
                   },
                   {
                     "id": "sw5c",
@@ -949,7 +949,8 @@
             "Telefono": "={{ $('data_citas').item.json.chatId }}",
             "Fecha y hora": "={{ DateTime.fromISO($('Procesar Confirmacion').item.json.startDateTime).setLocale('es').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\") }}",
             "Fecha ISO": "={{ $json.start.dateTime }}",
-            "Status": "1"
+            "Status": "1",
+            "created_at": "={{ new Date().toISOString() }}"
           },
           "schema": [
             {
@@ -1015,6 +1016,15 @@
               "displayName": "Status",
               "defaultMatch": false,
               "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "created_at",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
             }
           ],
           "mappingMode": "defineBelow",
@@ -1733,6 +1743,16 @@
               "displayName": "Status",
               "defaultMatch": false,
               "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "created_at",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
             }
           ],
           "mappingMode": "defineBelow",
@@ -2623,7 +2643,7 @@
       "parameters": {
         "operation": "set",
         "key": "={{ 'state:' + $('data_citas').item.json.chatId }}",
-        "value": "={{ JSON.stringify({ step: 'ask_date', nie: $json.nie, name: $json.name, ts: Date.now() }) }}",
+        "value": "={{ JSON.stringify({ step: 'ask_date', nie: ($json.nie || $json.NIE), name: ($json.name || $json.Nombre), ts: Date.now() }) }}",
         "additionalFields": {
           "expire": true,
           "ttl": 900
@@ -2646,7 +2666,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nconst zone = 'America/Guayaquil';\nconst now = DateTime.now().setZone(zone);\nconst rows = [];\nlet d = now.plus({ days: 1 });\nlet count = 0;\nwhile (count < 9) {\n  if (d.weekday !== 7) {\n    const lbl = d.setLocale('es').toFormat(\"cccc d 'de' MMMM\");\n    const lbl2 = lbl.charAt(0).toUpperCase() + lbl.slice(1);\n    const hrs = d.weekday === 6 ? '07:00 - 13:00' : '07:00 - 19:00';\n    rows.push({ id: `date_${d.toFormat('yyyy-MM-dd')}`, title: lbl2, description: hrs });\n    count++;\n  }\n  d = d.plus({ days: 1 });\n}\nrows.push({ id: 'date_manual', title: '\\u270f\\ufe0f Otra fecha', description: 'Escribe la fecha manualmente' });\nconst name = $('Procesar Nombre').item.json.name || state.name || 'Cliente';\nconst nie = $('Procesar Nombre').item.json.nie || state.nie || '';\nreturn { rows, name, nie };"
+        "jsCode": "const raw = $('Redis: Get State').item.json.propertyName;\nlet state = {};\ntry { state = JSON.parse(raw || '{}'); } catch(e) {}\nconst zone = 'America/Guayaquil';\nconst now = DateTime.now().setZone(zone);\nconst rows = [];\nlet d = now.plus({ days: 1 });\nlet count = 0;\nwhile (count < 9) {\n  if (d.weekday !== 7) {\n    const lbl = d.setLocale('es').toFormat(\"cccc d 'de' MMMM\");\n    const lbl2 = lbl.charAt(0).toUpperCase() + lbl.slice(1);\n    const hrs = d.weekday === 6 ? '07:00 - 13:00' : '07:00 - 19:00';\n    rows.push({ id: `date_${d.toFormat('yyyy-MM-dd')}`, title: lbl2, description: 'La atenci\\u00f3n es de ' + hrs });\n    count++;\n  }\n  d = d.plus({ days: 1 });\n}\nrows.push({ id: 'date_manual', title: '\\u270f\\ufe0f Otra fecha', description: 'Escribe la fecha manualmente' });\nlet name = 'Cliente';\nlet nie = '';\ntry { const p = $('Cargar Datos Paciente').item.json; if (p && p.name) { name = p.name; nie = p.nie || ''; } } catch(e) {}\nif (name === 'Cliente') { try { const p = $('Procesar Nombre').item.json; if (p && p.name) { name = p.name; nie = p.nie || ''; } } catch(e) {} }\nif (!nie) nie = state.nie || '';\nif (name === 'Cliente') name = state.name || 'Cliente';\nreturn { rows, name, nie };"
       },
       "id": "n9-084",
       "name": "Preparar Calendario",
@@ -2659,7 +2679,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const { rows, name, nie } = $json;\nconst body = {\n  messaging_product: 'whatsapp',\n  recipient_type: 'individual',\n  to: $('data_citas').item.json.chatId,\n  type: 'interactive',\n  interactive: {\n    type: 'list',\n    header: { type: 'text', text: '\\uD83D\\uDCC5 Elige una fecha' },\n    body: { text: `Hola *${name}* \\uD83D\\uDC4B\\n\\nEstos son los d\\u00edas disponibles para tu cita.\\nSelecciona uno o elige ‘Otra fecha’ para una fecha espec\\u00edfica:` },\n    footer: { text: 'Lun-Vie: 07:00-19:00 | S\\u00e1b: 07:00-13:00' },\n    action: { button: 'Ver fechas', sections: [{ title: 'Pr\\u00f3ximas fechas', rows }] }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
+        "jsCode": "const { rows, name, nie } = $json;\nconst body = {\n  messaging_product: 'whatsapp',\n  recipient_type: 'individual',\n  to: $('data_citas').item.json.chatId,\n  type: 'interactive',\n  interactive: {\n    type: 'list',\n    header: { type: 'text', text: '\\uD83D\\uDCC5 Elige una fecha' },\n    body: { text: `Hola *${name}* \\uD83D\\uDC4B\\n\\nEstos son los d\\u00edas disponibles para tu cita.\\nSelecciona uno o elige 'Otra fecha' para una fecha espec\\u00edfica:` },\n    footer: { text: 'Lun-Vie: 07:00-19:00 | S\\u00e1b: 07:00-13:00' },\n    action: { button: 'Ver fechas', sections: [{ title: 'Pr\\u00f3ximas fechas', rows }] }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
       },
       "id": "n9-085",
       "name": "Preparar WA Calendario",
@@ -3035,6 +3055,183 @@
         "redis": {
           "id": "V0yeP2XjW2OcieOH",
           "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ",
+          "mode": "list",
+          "cachedResultName": "Citas Agendadas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "paciente",
+          "mode": "name",
+          "cachedResultName": "paciente",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit#gid=paciente"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "NIE",
+              "lookupValue": "={{ $('Validar NIE (Agendar)').item.json.nie }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "n9-105",
+      "name": "Sheets: Buscar Paciente",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        500,
+        2750
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v7s9GIw4NGmJaHUm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "pe1",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.NIE }}",
+              "rightValue": ""
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "n9-106",
+      "name": "Paciente Existe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        700,
+        2750
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const nie = $json['NIE'];\nconst name = $json['Nombre'];\nreturn { nie, name };"
+      },
+      "id": "n9-107",
+      "name": "Cargar Datos Paciente",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        2650
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ",
+          "mode": "list",
+          "cachedResultName": "Citas Agendadas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "paciente",
+          "mode": "name",
+          "cachedResultName": "paciente",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit#gid=paciente"
+        },
+        "columns": {
+          "value": {
+            "NIE": "={{ $('Procesar Nombre').item.json.nie }}",
+            "Nombre": "={{ $('Procesar Nombre').item.json.name }}",
+            "Telefono": "={{ $('data_citas').item.json.chatId }}",
+            "created_at": "={{ new Date().toISOString() }}"
+          },
+          "schema": [
+            {
+              "id": "NIE",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "NIE",
+              "defaultMatch": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Nombre",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Telefono",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Telefono",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "created_at",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "created_at",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "NIE"
+          ]
+        },
+        "options": {}
+      },
+      "id": "n9-108",
+      "name": "Sheets: Guardar Paciente",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        500,
+        4350
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v7s9GIw4NGmJaHUm",
+          "name": "Google Sheets account"
         }
       }
     }
@@ -3683,7 +3880,7 @@
       "main": [
         [
           {
-            "node": "Redis: Set State Ask Name",
+            "node": "Sheets: Buscar Paciente",
             "type": "main",
             "index": 0
           }
@@ -3876,7 +4073,7 @@
       "main": [
         [
           {
-            "node": "Redis: Set State Ask Date",
+            "node": "Sheets: Guardar Paciente",
             "type": "main",
             "index": 0
           }
@@ -4123,6 +4320,57 @@
         [
           {
             "node": "Redis: Actualizar TS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets: Buscar Paciente": {
+      "main": [
+        [
+          {
+            "node": "Paciente Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Paciente Existe?": {
+      "main": [
+        [
+          {
+            "node": "Cargar Datos Paciente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis: Set State Ask Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cargar Datos Paciente": {
+      "main": [
+        [
+          {
+            "node": "Redis: Set State Ask Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets: Guardar Paciente": {
+      "main": [
+        [
+          {
+            "node": "Redis: Set State Ask Date",
             "type": "main",
             "index": 0
           }

@@ -1,0 +1,819 @@
+{
+  "name": "Sync Calendar ↔ Sheets (Completo)",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "filter-cita-created",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              },
+              "leftValue": "={{ $json.summary }}",
+              "rightValue": "Cita:"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0c448953-5f43-4f22-be04-9f98229b7c82",
+      "name": "¿Cita del bot? (Creado)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        272,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "filter-cita-updated",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              },
+              "leftValue": "={{ $json.summary }}",
+              "rightValue": "Cita:"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "53bf7f5b-aa44-4b4e-a70d-6b3c02aea90a",
+      "name": "¿Cita del bot? (Editado)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        272,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "filter-cita-cancelled",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              },
+              "leftValue": "={{ $json.summary }}",
+              "rightValue": "Cita:"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f99e1848-c0cc-49c9-89ce-4b1c6808a028",
+      "name": "¿Cita del bot? (Cancelado)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        272,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const evt = $input.first().json;\nconst summary = evt.summary || '';\nconst name = summary.replace(/^Cita:\\s*/i, '').trim();\nconst zone = 'America/Guayaquil';\nconst startDT = evt.start?.dateTime || evt.start?.date || '';\nconst fechaFormatted = startDT\n  ? DateTime.fromISO(startDT).setZone(zone).setLocale('es').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\")\n  : '';\n\nreturn {\n  id: evt.id,\n  \"Fecha ISO\": startDT,\n  \"Fecha y hora\": fechaFormatted,\n  \"Nombre Cliente\": name\n};"
+      },
+      "id": "1f1eeda0-8ab2-4ec0-928b-c33696d8fa5e",
+      "name": "Preparar datos (Crear)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ",
+          "mode": "list",
+          "cachedResultName": "Citas Agendadas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "Hoja 1"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "id",
+              "lookupValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3af16584-f650-4c8f-b9d2-878a5f469d61",
+      "name": "¿Ya existe en Sheets? (Crear)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v7s9GIw4NGmJaHUm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "no-exists-1",
+              "operator": {
+                "type": "number",
+                "operation": "notExists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.row_number }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "757b68da-e844-4422-a591-e59187feee8c",
+      "name": "¿No existe aún?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        944,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ",
+          "mode": "list",
+          "cachedResultName": "Citas Agendadas"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "Hoja 1"
+        },
+        "columns": {
+          "value": {
+            "id": "={{ $('Preparar datos (Crear)').item.json.id }}",
+            "Fecha ISO": "={{ $('Preparar datos (Crear)').item.json['Fecha ISO'] }}",
+            "Fecha y hora": "={{ $('Preparar datos (Crear)').item.json['Fecha y hora'] }}",
+            "Nombre Cliente": "={{ $('Preparar datos (Crear)').item.json['Nombre Cliente'] }}"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "id",
+              "defaultMatch": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre Cliente",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Nombre Cliente",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha y hora",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Fecha y hora",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha ISO",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Fecha ISO",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ]
+        },
+        "options": {}
+      },
+      "id": "0d21af41-5b4d-4a95-abba-93ce84d5b7ae",
+      "name": "Sheets: Agregar nueva fila",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1168,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v7s9GIw4NGmJaHUm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const evt = $input.first().json;\nconst summary = evt.summary || '';\nconst name = summary.replace(/^Cita:\\s*/i, '').trim();\nconst zone = 'America/Guayaquil';\nconst startDT = evt.start?.dateTime || evt.start?.date || '';\nconst fechaFormatted = startDT\n  ? DateTime.fromISO(startDT).setZone(zone).setLocale('es').toFormat(\"cccc, dd 'de' MMMM 'de' yyyy 'a las' HH:mm\")\n  : '';\n\nreturn {\n  id: evt.id,\n  \"Fecha ISO\": startDT,\n  \"Fecha y hora\": fechaFormatted,\n  \"Nombre Cliente\": name\n};"
+      },
+      "id": "0835282f-da87-49f9-9f1a-68623dc35f3f",
+      "name": "Preparar datos (Editar)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ",
+          "mode": "list",
+          "cachedResultName": "Citas Agendadas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit#gid=0"
+        },
+        "columns": {
+          "value": {
+            "id": "={{ $json.id }}",
+            "Fecha ISO": "={{ $json['Fecha ISO'] }}",
+            "Fecha y hora": "={{ $json['Fecha y hora'] }}",
+            "Nombre Cliente": "={{ $json['Nombre Cliente'] }}"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "id",
+              "defaultMatch": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre Cliente",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Nombre Cliente",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha y hora",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Fecha y hora",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha ISO",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Fecha ISO",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ]
+        },
+        "options": {}
+      },
+      "id": "a53eb316-3b4c-403d-b9fd-5b1f38334582",
+      "name": "Sheets: Actualizar fila",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        240
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v7s9GIw4NGmJaHUm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ",
+          "mode": "list",
+          "cachedResultName": "Citas Agendadas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "Hoja 1"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "id",
+              "lookupValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "105d45f4-116a-45fe-ac6b-1bfd9a99322b",
+      "name": "Sheets: Buscar fila (Cancelar)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        512,
+        480
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v7s9GIw4NGmJaHUm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "found-cancel-1",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.row_number }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "28c0fa16-3047-4cb7-95ab-7bf4142c0a83",
+      "name": "¿Fila encontrada? (Cancelar)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ",
+          "mode": "list",
+          "cachedResultName": "Citas Agendadas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "citas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Kk8iCXKkLALFSBnHlgoTTfV6YBAQpsxrbdekyGEpjbQ/edit#gid=0"
+        },
+        "columns": {
+          "value": {
+            "id": "={{ $json.id }}",
+            "Status": "2",
+            "created_at": "={{ new Date().toISOString() }}"
+          },
+          "schema": [
+            {
+              "id": "id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "id",
+              "defaultMatch": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "NIE",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "NIE",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Nombre Cliente",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "Nombre Cliente",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Telefono",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "Telefono",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Fecha y hora",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "Fecha y hora",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Fecha ISO",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "required": false,
+              "displayName": "Fecha ISO",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "Status",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Status",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "created_at",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ]
+        },
+        "options": {}
+      },
+      "id": "33ff9227-0c4d-45fd-8179-e9d44c9ea32b",
+      "name": "Sheets: Actualizar Status Cancel",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        944,
+        480
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "v7s9GIw4NGmJaHUm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "fespinoza@frecdigital.com",
+          "mode": "id"
+        },
+        "triggerOn": "eventCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        16
+      ],
+      "id": "f3a7cc8b-982f-426b-905b-46f9f22843de",
+      "name": "Google Calendar Trigger",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "G51TsY82QIvuYAdH",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "fespinoza@frecdigital.com",
+          "mode": "id"
+        },
+        "triggerOn": "eventUpdated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        240
+      ],
+      "id": "fad4fc80-d51a-42a6-9344-541aed3390e4",
+      "name": "Google Calendar Trigger1",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "G51TsY82QIvuYAdH",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "calendarId": {
+          "__rl": true,
+          "value": "fespinoza@frecdigital.com",
+          "mode": "list",
+          "cachedResultName": "fespinoza@frecdigital.com"
+        },
+        "triggerOn": "eventCancelled",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTrigger",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        480
+      ],
+      "id": "493595b0-ee46-49fe-9c10-a38177b10f42",
+      "name": "Google Calendar Trigger3",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "G51TsY82QIvuYAdH",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "¿Cita del bot? (Creado)": {
+      "main": [
+        [
+          {
+            "node": "Preparar datos (Crear)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Cita del bot? (Editado)": {
+      "main": [
+        [
+          {
+            "node": "Preparar datos (Editar)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Cita del bot? (Cancelado)": {
+      "main": [
+        [
+          {
+            "node": "Sheets: Buscar fila (Cancelar)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar datos (Crear)": {
+      "main": [
+        [
+          {
+            "node": "¿Ya existe en Sheets? (Crear)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Ya existe en Sheets? (Crear)": {
+      "main": [
+        [
+          {
+            "node": "¿No existe aún?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿No existe aún?": {
+      "main": [
+        [
+          {
+            "node": "Sheets: Agregar nueva fila",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar datos (Editar)": {
+      "main": [
+        [
+          {
+            "node": "Sheets: Actualizar fila",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets: Buscar fila (Cancelar)": {
+      "main": [
+        [
+          {
+            "node": "¿Fila encontrada? (Cancelar)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Fila encontrada? (Cancelar)": {
+      "main": [
+        [
+          {
+            "node": "Sheets: Actualizar Status Cancel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar Trigger": {
+      "main": [
+        [
+          {
+            "node": "¿Cita del bot? (Creado)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar Trigger1": {
+      "main": [
+        [
+          {
+            "node": "¿Cita del bot? (Editado)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar Trigger3": {
+      "main": [
+        [
+          {
+            "node": "¿Cita del bot? (Cancelado)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e7f03c0e-87e5-42a2-9374-f137dd59a26d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "15f2e9153f1a13665051e6584d5fecc1dee02696839d12ffa48b27cae2825711"
+  },
+  "id": "iwHRcW8NhciuD0Li",
+  "tags": []
+}
