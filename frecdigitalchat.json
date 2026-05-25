@@ -1,4 +1,4 @@
-{
+﻿{
   "name": "frecdigitalchat",
   "nodes": [
     {
@@ -204,7 +204,7 @@
                     "id": "sw1b",
                     "operator": {
                       "type": "string",
-                      "operation": "equals"
+                      "operation": "startsWith"
                     },
                     "leftValue": "={{ $('data_citas').item.json.messageText }}",
                     "rightValue": "hola"
@@ -244,7 +244,7 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict",
+                  "typeValidation": "loose",
                   "version": 2
                 },
                 "combinator": "and",
@@ -266,7 +266,7 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict",
+                  "typeValidation": "loose",
                   "version": 2
                 },
                 "combinator": "and",
@@ -288,7 +288,7 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict",
+                  "typeValidation": "loose",
                   "version": 2
                 },
                 "combinator": "and",
@@ -310,7 +310,7 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict",
+                  "typeValidation": "loose",
                   "version": 2
                 },
                 "combinator": "and",
@@ -332,7 +332,7 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict",
+                  "typeValidation": "loose",
                   "version": 2
                 },
                 "combinator": "and",
@@ -354,7 +354,7 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict",
+                  "typeValidation": "loose",
                   "version": 2
                 },
                 "combinator": "and",
@@ -376,7 +376,7 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict",
+                  "typeValidation": "loose",
                   "version": 2
                 },
                 "combinator": "and",
@@ -398,7 +398,7 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "strict",
+                  "typeValidation": "loose",
                   "version": 2
                 },
                 "combinator": "and",
@@ -452,7 +452,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const iquest = String.fromCharCode(0x00BF); // ¿\nconst eacu  = String.fromCharCode(0x00E9); // é\nconst body = {\n  messaging_product: \"whatsapp\",\n  recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId,\n  type: \"interactive\",\n  interactive: {\n    type: \"button\",\n    header: { type: \"text\", text: \"FrecDigital\" },\n    body: { text: \"Bienvenido a *FrecDigital*.\" + String.fromCharCode(10,10) + \"Implementamos *Inteligencia Artificial* para optimizar tu empresa.\" + String.fromCharCode(10,10) + iquest + \"En qu\" + eacu + \" podemos ayudarte hoy?\" },\n    footer: { text: \"frecdigital.com\" },\n    action: {\n      buttons: [\n        { type: \"reply\", reply: { id: \"btn_servicios\", title: \"Nuestros Servicios\" } },\n        { type: \"reply\", reply: { id: \"btn_asesoria\",  title: \"Agendar Asesoria\"  } },\n        { type: \"reply\", reply: { id: \"btn_hablar\",    title: \"Contactar Ahora\"   } }\n      ]\n    }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
+        "jsCode": "const iquest = String.fromCharCode(0x00BF); // \\u00BF\nconst eacu  = String.fromCharCode(0x00E9); // \\u00E9\nconst body = {\n  messaging_product: \"whatsapp\",\n  recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId,\n  type: \"interactive\",\n  interactive: {\n    type: \"button\",\n    header: { type: \"text\", text: \"FrecDigital\" },\n    body: { text: \"Bienvenido a *FrecDigital*.\" + String.fromCharCode(10,10) + \"Implementamos *Inteligencia Artificial* para optimizar tu empresa.\" + String.fromCharCode(10,10) + iquest + \"En qu\" + eacu + \" podemos ayudarte hoy?\" },\n    footer: { text: \"frecdigital.com\" },\n    action: {\n      buttons: [\n        { type: \"reply\", reply: { id: \"btn_servicios\", title: \"Nuestros Servicios\" } },\n        { type: \"reply\", reply: { id: \"btn_asesoria\",  title: \"Agendar Asesoria\"  } },\n        { type: \"reply\", reply: { id: \"btn_hablar\",    title: \"Contactar Ahora\"   } }\n      ]\n    }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
       },
       "id": "n9-011",
       "name": "Preparar Bienvenida",
@@ -735,7 +735,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = {\n  messaging_product: \"whatsapp\",\n  recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId,\n  type: \"interactive\",\n  interactive: {\n    type: \"list\",\n    header: { type: \"text\", text: \"FrecDigital\" },\n    body: { text: \"Soluciones de *Inteligencia Artificial* para tu negocio.\" + String.fromCharCode(10,10) + \"Selecciona el servicio que te interesa:\" },\n    footer: { text: \"frecdigital.com\" },\n    action: {\n      button: \"Ver servicios\",\n      sections: [{\n        title: \"Soluciones de IA\",\n        rows: [\n          { id: \"svc_asistentes\",     title: \"Asistentes de IA\",   description: \"Atencion automatizada 24/7\" },\n          { id: \"svc_agendamiento\",   title: \"Agenda Inteligente\", description: \"Reservas sin intervencion humana\" },\n          { id: \"svc_automatizacion\", title: \"Automatizacion\",     description: \"Elimina tareas repetitivas\" },\n          { id: \"svc_gerencial\",      title: \"Analisis Gerencial\", description: \"Reportes con IA en tiempo real\" },\n          { id: \"svc_integracion\",    title: \"Integracion de IA\",  description: \"Conecta tus plataformas\" }\n        ]\n      }]\n    }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
+        "jsCode": "const body = {\n  messaging_product: \"whatsapp\",\n  recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId,\n  type: \"interactive\",\n  interactive: {\n    type: \"list\",\n    header: { type: \"text\", text: \"FrecDigital\" },\n    body: { text: \"Soluciones de *Inteligencia Artificial* para tu negocio.\" + String.fromCharCode(10,10) + \"Selecciona el servicio que te interesa:\" },\n    footer: { text: \"frecdigital.com\" },\n    action: {\n      button: \"Ver servicios\",\n      sections: [{\n        title: \"Soluciones de IA\",\n        rows: [\n          { id: \"svc_asistentes\",     title: \"Asistentes de IA\",   description: \"Atenci\\u00F3n automatizada 24/7\" },\n          { id: \"svc_agendamiento\",   title: \"Agenda Inteligente\", description: \"Reservas sin intervenci\\u00F3n humana\" },\n          { id: \"svc_automatizaci\\u00F3n\", title: \"Automatizaci\\u00F3n\",     description: \"Elimina tareas repetitivas\" },\n          { id: \"svc_gerencial\",      title: \"An\\u00E1lisis Gerencial\", description: \"Reportes con IA en tiempo real\" },\n          { id: \"svc_integraci\\u00F3n\",    title: \"Integraci\\u00F3n de IA\",  description: \"Conecta tus plataformas\" }\n        ]\n      }]\n    }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
       },
       "id": "fd-001",
       "name": "Preparar Lista Servicios",
@@ -775,7 +775,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const svc = $(\"data_citas\").item.json.messageText;\nconst NL = String.fromCharCode(10);\nconst robot  = String.fromCharCode(0xD83D, 0xDCAC); // 💬 chat assistant\nconst cal    = String.fromCharCode(0xD83D, 0xDCC5);\nconst bolt   = String.fromCharCode(0x26A1);\nconst chart  = String.fromCharCode(0xD83D, 0xDCCA);\nconst link   = String.fromCharCode(0xD83D, 0xDD17);\nconst d = {\n  svc_asistentes:    { e: robot,  t: \"Asistentes de IA\",   d: \"- Disponibles 24/7 sin intervencion humana\" + NL + \"- WhatsApp, Instagram, Facebook y web\" + NL + \"- Personalizados para tu industria\" + NL + \"- Calificacion automatica de leads\" },\n  svc_agendamiento:  { e: cal,   t: \"Agenda Inteligente\",  d: \"- Automatiza reservas y confirmaciones\" + NL + \"- Recordatorios automaticos al cliente\" + NL + \"- Sin intervencion humana\" + NL + \"- Integracion con tu calendario\" },\n  svc_automatizacion:{ e: bolt,  t: \"Automatizacion\",      d: \"- Digitaliza flujos de trabajo\" + NL + \"- Reduce errores y tiempos operativos\" + NL + \"- Aumenta la productividad del equipo\" + NL + \"- Flujos personalizados a tu negocio\" },\n  svc_gerencial:     { e: chart, t: \"Analisis Gerencial\",  d: \"- Consulta ventas en lenguaje natural\" + NL + \"- Reportes instantaneos por periodo\" + NL + \"- Dashboards inteligentes\" + NL + \"- Analisis predictivo con IA\" },\n  svc_integracion:   { e: link,  t: \"Integracion de IA\",   d: \"- Conecta tus plataformas empresariales\" + NL + \"- Centraliza datos y procesos\" + NL + \"- Automatiza comunicaciones entre sistemas\" + NL + \"- APIs y webhooks personalizados\" }\n}[svc] || { e: \"\", t: \"FrecDigital\", d: \"Contactanos para conocer mas sobre nuestras soluciones.\" };\nconst body = {\n  messaging_product: \"whatsapp\", recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId, type: \"interactive\",\n  interactive: {\n    type: \"button\",\n    header: { type: \"text\", text: \"FrecDigital\" },\n    body: { text: d.e + \" *\" + d.t + \"*\" + NL + NL + d.d },\n    footer: { text: String.fromCharCode(0x00BF) + \"Te interesa este servicio?\" },\n    action: { buttons: [\n      { type: \"reply\", reply: { id: \"btn_asesoria\",  title: \"Agendar Asesoria\" } },\n      { type: \"reply\", reply: { id: \"btn_servicios\", title: \"Ver mas servicios\" } },\n      { type: \"reply\", reply: { id: \"btn_hablar\",    title: \"Contactar Ahora\"   } }\n    ]}\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
+        "jsCode": "const svc = $(\"data_citas\").item.json.messageText;\nconst NL = String.fromCharCode(10);\nconst robot  = String.fromCharCode(0xD83D, 0xDCAC); // \\uD83D\\uDCAC chat assistant\nconst cal    = String.fromCharCode(0xD83D, 0xDCC5);\nconst bolt   = String.fromCharCode(0x26A1);\nconst chart  = String.fromCharCode(0xD83D, 0xDCCA);\nconst link   = String.fromCharCode(0xD83D, 0xDD17);\nconst d = {\n  svc_asistentes:    { e: robot,  t: \"Asistentes de IA\",   d: \"- Disponibles 24/7 sin intervenci\\u00F3n humana\" + NL + \"- WhatsApp, Instagram, Facebook y web\" + NL + \"- Personalizados para tu industria\" + NL + \"- Calificaci\\u00F3n automatica de leads\" },\n  svc_agendamiento:  { e: cal,   t: \"Agenda Inteligente\",  d: \"- Automatiza reservas y confirmaciones\" + NL + \"- Recordatorios automaticos al cliente\" + NL + \"- Sin intervenci\\u00F3n humana\" + NL + \"- Integraci\\u00F3n con tu calendario\" },\n  svc_automatizaci\\u00F3n:{ e: bolt,  t: \"Automatizaci\\u00F3n\",      d: \"- Digitaliza flujos de trabajo\" + NL + \"- Reduce errores y tiempos operativos\" + NL + \"- Aumenta la productividad del equipo\" + NL + \"- Flujos personalizados a tu negocio\" },\n  svc_gerencial:     { e: chart, t: \"An\\u00E1lisis Gerencial\",  d: \"- Consulta ventas en lenguaje natural\" + NL + \"- Reportes instant\\u00E1neos por periodo\" + NL + \"- Dashboards inteligentes\" + NL + \"- An\\u00E1lisis predictivo con IA\" },\n  svc_integraci\\u00F3n:   { e: link,  t: \"Integraci\\u00F3n de IA\",   d: \"- Conecta tus plataformas empresariales\" + NL + \"- Centraliza datos y procesos\" + NL + \"- Automatiza comunicaciones entre sistemas\" + NL + \"- APIs y webhooks personalizados\" }\n}[svc] || { e: \"\", t: \"FrecDigital\", d: \"Cont\\u00E1ctanos para conocer mas sobre nuestras soluciones.\" };\nconst body = {\n  messaging_product: \"whatsapp\", recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId, type: \"interactive\",\n  interactive: {\n    type: \"button\",\n    header: { type: \"text\", text: \"FrecDigital\" },\n    body: { text: d.e + \" *\" + d.t + \"*\" + NL + NL + d.d },\n    footer: { text: String.fromCharCode(0x00BF) + \"Te interesa este servicio?\" },\n    action: { buttons: [\n      { type: \"reply\", reply: { id: \"btn_asesoria\",  title: \"Agendar Asesor\\u00EDa\" } },\n      { type: \"reply\", reply: { id: \"btn_servicios\", title: \"Ver mas servicios\" } },\n      { type: \"reply\", reply: { id: \"btn_hablar\",    title: \"Contactar Ahora\"   } }\n    ]}\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
       },
       "id": "fd-003",
       "name": "Preparar Detalle Servicio",
@@ -815,7 +815,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const phone = String.fromCharCode(0xD83D, 0xDCDE); // 📞\nconst globe = String.fromCharCode(0xD83C, 0xDF10);  // 🌐\nconst body = {\n  messaging_product: \"whatsapp\",\n  recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId,\n  type: \"text\",\n  text: { body: phone + \" *Contacto Directo*\" + String.fromCharCode(10,10) + \"Un asesor de *FrecDigital* se pondr\\u00E1 en contacto contigo en breve.\" + String.fromCharCode(10,10) + globe + \" V\\u00EDs\\u00EDtanos en *frecdigital.com*\" }\n};\nreturn { bodyJson: JSON.stringify(body) };"
+        "jsCode": "const phone = String.fromCharCode(0xD83D, 0xDCDE); // \\uD83D\\uDCDE\nconst globe = String.fromCharCode(0xD83C, 0xDF10);  // \\uD83C\\uDF10\nconst body = {\n  messaging_product: \"whatsapp\",\n  recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId,\n  type: \"text\",\n  text: { body: phone + \" *Contacto Directo*\" + String.fromCharCode(10,10) + \"Un asesor de *FrecDigital* se pondr\\u00E1 en contacto contigo en breve.\" + String.fromCharCode(10,10) + globe + \" Vis\\u00EDtanos en *frecdigital.com*\" }\n};\nreturn { bodyJson: JSON.stringify(body) };"
       },
       "id": "fd-005",
       "name": "Preparar Hablar Ahora",
@@ -880,7 +880,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = {\n  messaging_product: \"whatsapp\",\n  recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId,\n  type: \"text\",\n  text: { body: \"\\uD83D\\uDCCB Iniciemos tu solicitud de asesoria.\" + String.fromCharCode(10,10) + \"\\uD83D\\uDC64 \\u00BFCu\\u00E1l es tu *nombre completo*?\" }\n};\nreturn { bodyJson: JSON.stringify(body) };"
+        "jsCode": "const body = {\n  messaging_product: \"whatsapp\",\n  recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId,\n  type: \"text\",\n  text: { body: \"\\uD83D\\uDCCB Iniciemos tu solicitud de asesor\\u00EDa.\" + String.fromCharCode(10,10) + \"\\uD83D\\uDC64 \\u00BFCu\\u00E1l es tu *nombre completo*?\" }\n};\nreturn { bodyJson: JSON.stringify(body) };"
       },
       "id": "fd-008",
       "name": "Preparar Ask Nombre FD",
@@ -998,7 +998,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const raw = $('data_citas').item.json.messageText.trim();\nconst state = JSON.parse($('Redis: Get State').item.json.propertyName || '{}');\nconst emailRegex = /^[^s@]+@[^s@]+.[^s@]+$/;\nconst valid = emailRegex.test(raw);\nreturn { email: raw, valid, nombre: state.nombre, state };"
+        "jsCode": "const raw = $('data_citas').item.json.messageText.trim();\nconst state = JSON.parse($('Redis: Get State').item.json.propertyName || '{}');\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nconst valid = emailRegex.test(raw);\nreturn { email: raw, valid, nombre: state.nombre, state };"
       },
       "id": "fd-014",
       "name": "Procesar Email FD",
@@ -1036,7 +1036,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = {\n  messaging_product: \"whatsapp\",\n  recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId,\n  type: \"interactive\",\n  interactive: {\n    type: \"list\",\n    header: { type: \"text\", text: \"FrecDigital\" },\n    body: { text: \"\\u00BFQu\\u00E9 *servicio* te interesa?\" },\n    footer: { text: \"Selecciona una opci\\u00F3n\" },\n    action: {\n      button: \"Ver servicios\",\n      sections: [{\n        title: \"Soluciones de IA\",\n        rows: [\n          { id: \"asv_asistentes\",     title: \"Asistentes de IA\",   description: \"Atencion automatizada 24/7\" },\n          { id: \"asv_agendamiento\",   title: \"Agenda Inteligente\", description: \"Reservas sin intervencion humana\" },\n          { id: \"asv_automatizacion\", title: \"Automatizacion\",     description: \"Elimina tareas repetitivas\" },\n          { id: \"asv_gerencial\",      title: \"Analisis Gerencial\", description: \"Reportes con IA en tiempo real\" },\n          { id: \"asv_integracion\",    title: \"Integracion de IA\",  description: \"Conecta tus plataformas\" }\n        ]\n      }]\n    }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
+        "jsCode": "const body = {\n  messaging_product: \"whatsapp\",\n  recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId,\n  type: \"interactive\",\n  interactive: {\n    type: \"list\",\n    header: { type: \"text\", text: \"FrecDigital\" },\n    body: { text: \"\\u00BFQu\\u00E9 *servicio* te interesa?\" },\n    footer: { text: \"Selecciona una opci\\u00F3n\" },\n    action: {\n      button: \"Ver servicios\",\n      sections: [{\n        title: \"Soluciones de IA\",\n        rows: [\n          { id: \"asv_asistentes\",     title: \"Asistentes de IA\",   description: \"Atenci\\u00F3n automatizada 24/7\" },\n          { id: \"asv_agendamiento\",   title: \"Agenda Inteligente\", description: \"Reservas sin intervenci\\u00F3n humana\" },\n          { id: \"asv_automatizacion\", title: \"Automatizaci\\u00F3n\",     description: \"Elimina tareas repetitivas\" },\n          { id: \"asv_gerencial\",      title: \"An\\u00E1lisis Gerencial\", description: \"Reportes con IA en tiempo real\" },\n          { id: \"asv_integracion\",    title: \"Integraci\\u00F3n de IA\",  description: \"Conecta tus plataformas\" }\n        ]\n      }]\n    }\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
       },
       "id": "fd-016",
       "name": "Preparar Ask Servicio FD",
@@ -1213,7 +1213,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const s = $('Procesar Disponibilidad FD').item.json;\nconst NL = String.fromCharCode(10);\nconst body = {\n  messaging_product: \"whatsapp\", recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId, type: \"interactive\",\n  interactive: {\n    type: \"button\",\n    header: { type: \"text\", text: \"FrecDigital\" },\n    body: { text: \"\\uD83D\\uDCCB *Resumen de tu Solicitud*\" + NL + NL + \"Confirma los datos de tu asesoria:\" + NL + NL + \"\\uD83D\\uDC64 *Nombre:* \" + s.nombre + NL + \"\\uD83D\\uDCE7 *Email:* \" + s.email + NL + \"\\uD83D\\uDCBC *Servicio:* \" + s.servicio + NL + \"\\uD83D\\uDCC5 *Disponibilidad:* \" + s.disponibilidad },\n    footer: { text: \"Un asesor te contactar\\u00E1 pronto\" },\n    action: { buttons: [\n      { type: \"reply\", reply: { id: \"btn_confirm_fd_yes\", title: \"Confirmar\" } },\n      { type: \"reply\", reply: { id: \"btn_confirm_fd_no\",  title: \"Cancelar\"  } }\n    ]}\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
+        "jsCode": "const s = $('Procesar Disponibilidad FD').item.json;\nconst NL = String.fromCharCode(10);\nconst body = {\n  messaging_product: \"whatsapp\", recipient_type: \"individual\",\n  to: $(\"data_citas\").item.json.chatId, type: \"interactive\",\n  interactive: {\n    type: \"button\",\n    header: { type: \"text\", text: \"FrecDigital\" },\n    body: { text: \"\\uD83D\\uDCCB *Resumen de tu Solicitud*\" + NL + NL + \"Confirma los datos de tu asesor\\u00EDa:\" + NL + NL + \"\\uD83D\\uDC64 *Nombre:* \" + s.nombre + NL + \"\\uD83D\\uDCE7 *Email:* \" + s.email + NL + \"\\uD83D\\uDCBC *Servicio:* \" + s.servicio + NL + \"\\uD83D\\uDCC5 *Disponibilidad:* \" + s.disponibilidad },\n    footer: { text: \"Un asesor te contactar\\u00E1 pronto\" },\n    action: { buttons: [\n      { type: \"reply\", reply: { id: \"btn_confirm_fd_yes\", title: \"Confirmar\" } },\n      { type: \"reply\", reply: { id: \"btn_confirm_fd_no\",  title: \"Cancelar\"  } }\n    ]}\n  }\n};\nreturn { bodyJson: JSON.stringify(body) };"
       },
       "id": "fd-025",
       "name": "Preparar Resumen Asesoria FD",
